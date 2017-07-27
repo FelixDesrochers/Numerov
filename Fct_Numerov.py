@@ -5,6 +5,9 @@ sys.path.append('/Users/anaconda/lib/python3.6/site-packages')
 
 import math
 import numpy as np
+from mpmath import *
+import matplotlib.pyplot as plt
+mp.dps = 45
 
 ######################################################################################
 # 1) Potential functions
@@ -40,7 +43,7 @@ def VerifySyntaxPotential(potential):
         try:
             x=0
             eval(potential)
-        except SyntaxError:
+        except:
             potential = input('The potential is incorrect enter a new one: ')
             potential = ModifyPotential(potential)
         else:
@@ -82,10 +85,11 @@ def VerifyLimitsPotential(potential):
 
 def VerifyConcavity(PotentialArray):
     '''Evaluates the concavity of the potential and returns its value positive if the concavity is correct or negative if it is incorrect'''
-    i=1
-    E_verify=2
-    index_min=[]
-    index_max=[]
+
+    E_verify=7.8*(10**(-20))
+    index_min=list()
+    index_max=list()
+
 
     for i in range(0,len(PotentialArray)-2):
         #Gets all the points where the potential meets the E_verify value
@@ -102,14 +106,18 @@ def VerifyConcavity(PotentialArray):
             elif PotentialArray[i-1]<E_verify and PotentialArray[i+1]>E_verify:
                 index_max.append(i)
 
-        #Gets the concavity value
-        index_max = np.array(index_max)
-        index_min = np.array(index_min)
+    #Gets the concavity value
+    index_max = np.array(index_max)
+    index_min = np.array(index_min)
 
-        if (index_max.max() > index_min.max()) and (index_min.min() < index_min.min()):
-            concavity = 'positive'
-        else:
-            concavity = 'negative'
+    print('index max: ',index_max)
+    print('index_min: ',index_min)
+
+    if (index_max.max() > index_min.max()) and (index_max.min() > index_min.min()):
+        concavity = 'positive'
+    else:
+        concavity = 'negative'
+
     return concavity
 
 
@@ -120,6 +128,50 @@ def EvaluateOnePotential(position,potential):
 
     return EvalPotential
 
+def GetTranslation(potential):
+    '''Checks approximately where the minimum of the potential is and outputs the necessary translation in x and y to recenter the minimum at x=0 and y=0'''
+
+    #i) Create a potential Array
+    Nbr_Div = 100000
+    x_min = -10
+    x_max = 10
+    Div = (x_max - x_min)/Nbr_Div
+    y = list()
+
+    for i in range(Nbr_Div):
+        position = x_min + (Div * i)
+        y.append(EvaluateOnePotential(position,potential))
+
+    #ii) Gets the minimum value for the potential
+    trans_y = min(y)
+    index = y.index(trans_y)
+    trans_x = x_min + (Div * index)
+
+    print('trans_x; ',trans_x)
+    print('trans_y; ',trans_y)
+
+    return trans_x,trans_y
+
+def TranslatePotential(potential,trans_x,trans_y):
+    '''Modify the potential expression to center its minimum at x=0 and y=0'''
+    #x translation
+    potential = potential.replace('x','(x+' + str(trans_x) + ')')
+
+    #y translation
+    potential = potential + '-' +  str(trans_y)
+
+    print(potential)
+
+    return potential
+
+def Recenters(PotentialArray,PositionPotential):
+    '''Translate the potential array to rencenter it at (0,0) '''
+
+    #Translate the potential array
+
+    #Translate the position potential
+
+    return PotentialArray,PositionPotential
 
 ##################################################
 # 2) Numerov algorithm functions
@@ -129,20 +181,30 @@ def EvaluateOnePotential(position,potential):
 #########################
 # i) Initial Energy guess
 
-def E_Guess(EnergyLevelFound, E_guess_try):
+def E_Guess(EnergyLevelFound, E_guess_try, iteration):
     '''Defines the energy guess depending on the energy levels that have been found and on the energy that have already been guessed. '''
+
+    print('Iteration: ',iteration)
+    #If it is the first time, return the first energy level of the quantum harmonic oscillator
+    if iteration == 1:
+        MassElectron = (9.10938215 * (10**(-31)))
+        HBar = (1.054571726 * (10**(-34)))
+        E_guess = (1/2)*(HBar * ((MassElectron)**(-1/2))) * (2**(1/2))  #Takes as intial guess the energy level of the quantum harmonic oscillator with k=1
+        return E_guess
 
     # I) Define the energy level that we want to find E_level_guess (the lowest energy level that hasn't been found yet)
     #List for the energy that have been found
     Lvl_found = list(EnergyLevelFound.keys())
     Lvl_found.sort()
-    #Gets the energy level that we want to find fo this guess
-    E_level_missing = [Energy for index,Energy in enumerate(Lvl_found) if not Energy == index]
-    if E_level_missing == None:
-        E_level_guess = max(Lvl_found) +1
+    #Gets the energy level that we want to find
+    E_level_missing = [index for index,Energy in enumerate(Lvl_found) if not Energy <= index]
+    if not E_level_missing:
+        if not Lvl_found:
+            E_level_guess = 0
+        else:
+            E_level_guess = max(Lvl_found) +1
     else:
-        E_level_missing.sort()
-        E_level_guess = E_level_missing[0]
+        E_level_guess = min(E_level_missing)
 
     # II) Defining the energy guess depending on the guess that have already been done (E_guess_try)
     #Finds the closest energy energy level (number of nodes) that has been guessed and that corresponds to a smaller or an equal number of nodes than E_level_guess
@@ -152,22 +214,26 @@ def E_Guess(EnergyLevelFound, E_guess_try):
         E_level_smaller = None
     #Finds the closest energy energy level (number of nodes) that has been guessed and that corresponds to a bigger number of nodes than E_level_guess
     try:
-        E_level_bigger = min([ E for E in E_guess_try.key() if E > E_level_guess ])
+        E_level_bigger = min([ E for E in E_guess_try.keys() if E > E_level_guess ])
     except ValueError:
         E_level_bigger = None
 
     #Define the energy guess
     #If the smaller and higher exist take the average
-    if E_level_smaller and E_level_bigger:
+    if (not E_level_smaller == None) and (not E_level_bigger ==None):
         E_guess = ( E_guess_try[E_level_smaller][1] + E_guess_try[E_level_bigger][0] ) / 2
 
     #If only the higher exists take the half
-    elif E_level_bigger:
+    elif not E_level_bigger == None:
         E_guess = E_guess_try[E_level_bigger][0]/2
 
     #If only the smaller exists take the double
-    elif E_level_smaller:
+    elif not E_level_smaller == None:
         E_guess = E_guess_try[E_level_smaller][1] * 2
+
+    print('E_level_guess:', E_level_guess )
+    print('E_level_bigger: ', E_level_bigger)
+    print('E_level_smaller: ', E_level_smaller)
 
     return E_guess
 
@@ -190,14 +256,16 @@ def MeetingPointsPotential(E_guess, PotentialArray, PositionPotential):
         if (PotentialArray[i] < E_guess and PotentialArray[i+1] > E_guess) or (PotentialArray[i] > E_guess and PotentialArray[i+1] < E_guess) or PotentialArray[i] == E_guess:
             #And filter them
             if (MeetingPoints[0] == None) or (PositionPotential[i] < MeetingPoints[0]):
+                print('index rencontre min: ',i)
                 MeetingPoints[0] = PositionPotential[i]
             elif (MeetingPoints[1] == None) or (PositionPotential[i] > MeetingPoints[1]):
                 MeetingPoints[1] = PositionPotential[i]
+                print('index renccontre max: ', i)
 
     MeetingPoints = tuple(MeetingPoints)
     return MeetingPoints
 
-def DetermineMinAndMax(MeetingPoints,x_V_min,x_V_max):
+def DetermineMinAndMax(MeetingPoints):
     '''This function determines the minimal and maximal position where the wave function will be set to 0 depending on the points where the potential meets the guess energy and on
     the minimum and maximum that are initially set for the potential
 
@@ -210,10 +278,15 @@ def DetermineMinAndMax(MeetingPoints,x_V_min,x_V_max):
         Position_min: the minimum value where psi=0
         Position_max: the maximum value where psi=0'''
 
-    #Sets the min and max as the medium value between the meeting with the potential and the ending
-    Position_min = (x_V_min + MeetingPoints[0])/2
-    Position_max = (x_V_max + MeetingPoints[1])/2
+    #Sets the min and max as the half of the distance between the min and the max plus the min or the max
 
+
+    Position_min = MeetingPoints[0] - (MeetingPoints[1] - MeetingPoints[0])/1
+    Position_max =  MeetingPoints[1] + (MeetingPoints[1] - MeetingPoints[0])/1
+
+    print('MeetingPoint: ', MeetingPoints)
+    print('min:',Position_min)
+    print('max:',Position_max)
     return Position_min,Position_max
 
 #######################################
@@ -223,6 +296,13 @@ def WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, 
     '''This function calculates the wave function values depending on the x coordinate by using the Numerov method. The function returns a list that contains tuple with the x coordinate and
     the wave function value. It has the general form: [(x0, psi(x0)), (x1, psi(x1)), ...]'''
 
+    #Sets the precision for arbitrary precision arithmetic
+    E_guess = mpf(E_guess)
+    Initial_augmentation = mpf(Initial_augmentation)
+    Position_min = mpf(Position_min)
+    Position_max = mpf(Position_max)
+    nbr_division = mpf(nbr_division)
+
     #Initializing the wave function
     WaveFunction = []
 
@@ -230,42 +310,42 @@ def WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, 
     Division = (Position_max - Position_min) / nbr_division
 
     #Setting constant
-    HBar = 1.054571726 * (10**(-34))
-    MassElectron = 9.10938215 * (10**(-31))
+    HBar = mpf(1.054571726 * (10**(-34)))
+    MassElectron = mpf(9.10938215 * (10**(-31)))
 
     #Setting the first values of the wave function
-    WaveFunction.append((Position_min,0))
-    WaveFunction.append((Position_min+Division, Initial_augmentation))
+    WaveFunction.append((float(Position_min),0))
+    WaveFunction.append((float(Position_min+Division), float(Initial_augmentation)))
 
     #Defing an array and an index to use in the for loop
     index = 0
     PositionArray = np.arange(Position_min, Position_max, Division)
 
     #Calculating the wave function for other values
-    for i in np.arange(Position_min + 2 * Division, Position_max + Division, Division):
+    for i in np.arange(Position_min + (2 * Division), Position_max + Division, Division):
         #Evaluating the potential
         #For V_i+1
-        x = i
+        x = mpf(i)
         V_plus1 = eval(potential)
 
         #For V_i
-        x = PositionArray[index]
+        x = mpf(PositionArray[index+1])
         V = eval(potential)
 
         #For V_i-1
-        x = PositionArray[index + 1]
+        x = mpf(PositionArray[index])
         V_minus1 = eval(potential)
 
         #Setting the k**2 values ( where k**2 = (2m/HBar)*(E-V(x)) )
-        k_2_plus1 = ((2*MassElectron)/(HBar**2)) * (E_guess - V_plus1)
-        k_2 = ((2*MassElectron)/(HBar**2)) * (E_guess - V)
-        k_2_minus1 = ((2*MassElectron)/(HBar**2)) * (E_guess - V_minus1)
+        k_2_plus1 = mpf(((2*MassElectron)/(HBar**2)) * (E_guess - V_plus1))
+        k_2 = mpf(((2*MassElectron)/(HBar**2)) * (E_guess - V))
+        k_2_minus1 = mpf(((2*MassElectron)/(HBar**2)) * (E_guess - V_minus1))
 
         #Calculating the wave function
-        psi = ((2 * (1 - (5/12) * (Division**2) * (k_2)) * WaveFunction[-1][1]) - (1 + (1/12) * (Division**2) * k_2_minus1 ) * WaveFunction[-2][1] ) / (1 + (1/12) * (Division**2) * k_2_plus1)
+        psi = ((2 * (1 - (5/12) * (Division**2) * (k_2)) * mpf(WaveFunction[-1][1])) - (1 + (1/12) * (Division**2) * k_2_minus1 ) * mpf(WaveFunction[-2][1])) / (1 + (1/12) * (Division**2) * k_2_plus1)
 
         #Saving the wave function and the x coordinate
-        WaveFunction.append((i,psi))
+        WaveFunction.append((float(i),float(psi)))
 
         #Incrementing the index
         index += 1
@@ -281,28 +361,65 @@ def WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, 
 def NumberNodes(WaveFunction):
     '''This function evaluates the number of nodes in the wavefunction. The number of nodes will allow us the determine the energy level to which a certain wave function corresponds'''
 
-    #Initialize the number of nodes
+    #Initialize the number of nodes and their position
     NumberOfNodes = 0
+    PositionNodes = list()
 
     #Calculate the number of nodes
-    for i in range(0,len(WaveFunction)-2):
-
-        if (WaveFunction[i][1] > 0 and WaveFunction[i+1][1] < 0) or (WaveFunction[i][1] > 0 and WaveFunction[i+1][1] < 0 ) or (WaveFunction[i][1] == 0):
+    for i in range(1,len(WaveFunction)-1):
+        if (WaveFunction[i][1] > 0 and WaveFunction[i+1][1] < 0) or (WaveFunction[i][1] < 0 and WaveFunction[i+1][1] > 0) or (WaveFunction[i][1] == 0):
             NumberOfNodes += 1
+            PositionNodes.append(WaveFunction[i][0])
 
-    return NumberOfNodes
+
+    #Gets the biggest position
+    x = list()
+    for position,wave in WaveFunction:
+        x.append(position)
+    x_max = max(x)
+
+    print('PositionNodes:', PositionNodes)
+    #print('Position max x :', x_max)
+
+    return NumberOfNodes,PositionNodes,x_max
 
 
 
 #####################################################
 # v) Verify if wave function respects the restriction
 
-def VerifyTolerance(WaveFunction, Tolerance):
+def VerifyTolerance(WaveFunction, Tolerance, E_guess, E_guess_try, NumberOfNodes):
     '''See if the wave function for the given energy level respects the tolerance. Returns yes if it respects the tolerance and no if not.'''
 
-    VerificationTolerance = 'yes' if WaveFunction[-1][1] < Tolerance else 'no'
+    # i) Checks if the last value of the wave function respects the tolerance
+    VerificationTolerance = 'yes' if math.fabs(WaveFunction[-1][1]) < Tolerance else 'no'
+    print('Last value Wave Function: ', WaveFunction[-1][1])
+
+    # ii) Checks if the energy guess doesn't change a lot
+    try:
+        E_minus = E_guess_try[NumberOfNodes][1]
+        E_plus = E_guess_try[NumberOfNodes + 1][0]
+    except KeyError:
+        pass
+    else:
+        if (E_guess < E_plus and E_guess > E_minus) and ((E_minus/E_plus) > 0.99999999) and (math.fabs(WaveFunction[-1][1] < 10000)):
+            VerificationTolerance = 'yes'
 
     return VerificationTolerance
+
+def CorrectNodeNumber(NumberOfNodes,PositionNodes,x_max,E_guess,E_guess_try):
+    ''' '''
+    NumberOfNodesCorrected = NumberOfNodes
+    #Correct the number of nodes if E_guess is between the lowest energy for this number of nodes and the maximum for the number of nodes - 1
+    try:
+        if (E_guess_try[NumberOfNodes][1] > E_guess) and (E_guess_try[NumberOfNodes - 1][1] < E_guess):
+            NumberOfNodesCorrected -= 1
+    #If the dictionnary E_guess_try doesn't contain these keys check if the Last number of nodes is close to the maximum value in x x_max
+    except KeyError:
+        if (PositionNodes/x_max) > 94:
+            NumberOfNodesCorrected -= 1
+
+    return NumberOfNodesCorrected
 
 #######################################################
 # vi) Saves energy and the correponding number of nodes
@@ -327,3 +444,73 @@ def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
         E_guess_try[NumberOfNodes][1] = E_guess
 
     return E_guess_try
+
+
+
+#####################################
+# 3) Ouput (Energy levels and figure)
+####################################
+
+############################
+# i) Draw the figure
+
+#Draw the wave Functions, the energy levels and sets the axis limits
+def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound):
+
+    #Determine the maximum energy to set the maximum value for the y axis
+    E_max = EnergyLevelFound[max(EnergyLevelFound)]
+    y_max = 1.4 * E_max
+    Y_by_E_level = 0.8*(y_max/(max(EnergyLevelFound)+1))
+
+    #Draw wave functions
+    for i in WaveFunctionFound.keys():
+        x =[]
+        y= []
+        for j in range(len(WaveFunctionFound[i])):
+            x.append(WaveFunctionFound[i][j][0])
+            y.append(WaveFunctionFound[i][j][1])
+
+        x = np.array(x)
+        y = np.array(y)
+
+        mult = (Y_by_E_level)/(2 * y.max())
+        y = mult * y + EnergyLevelFound[i]
+        plt.plot(x,y,'b')
+
+        #Draw the Energy guess
+        for j in range(len(x)):
+            y[j] = EnergyLevelFound[i]
+
+        plt.plot(x,y,'g--')
+
+    #Determines the min and max in x
+    min_x = x.min()
+    max_x = x.max()
+
+    #Determine the max in y
+    #max_y = (1.1 * y.max())
+
+    #Sets the axis limits
+    plt.axis([min_x, max_x, 0, y_max])
+
+    #Draw the Energy guess
+    for j in range(len(x)):
+        y[j] = EnergyLevelFound[i]
+
+    plt.plot(x,y,'g--')
+
+
+#Draw the potential
+def DrawPotential(PositionPotential, PotentialArray):
+    plt.plot(PositionPotential, PotentialArray, 'r')
+
+#Displays the figure
+def DisplayFigure():
+    plt.show()
+
+#############################
+# ii) ouput the energy levels
+def OuputEnergy(EnergyLevelFound):
+    for i,Energy in EnergyLevelFound.items():
+        print('Energy level', i, ':', Energy)
+

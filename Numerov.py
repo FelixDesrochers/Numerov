@@ -20,7 +20,6 @@ sys.path.append('/Users/felix/anaconda/lib/python3.6/site-packages')
 
 import math
 import numpy as np
-#import matplotlib.pyplot as plt
 
 #Imports the Fct_Numerov module which defines many functions that will be used in this script
 import Fct_Numerov
@@ -32,18 +31,18 @@ import Fct_Numerov
 #Indication :Theses parameters determine the precision of the calculations and can be adjust as wanted
 
 #Setting the range from wich we will evaluate the potential and teh number of division we will include
-x_V_min = -50.0
-x_V_max = 50.0
-nbr_division_V = 500
+x_V_min = -(10**(-9))
+x_V_max = (10**(-9))
+nbr_division_V = 500000
 
 #Setting the number of division from the initial point in the classical forbidden zone x_0 t the ending point x_max
-nbr_division = 200
+nbr_division = 15000
 
 #Setting the initial augmentation after the point where the wave function will be set to zero
-Initial_augmentation = 0.01
+Initial_augmentation = 0.00001
 
 #Setting the tolerance for the wave fonction at the ending point (x_max) to accept the energy level as the wnated energy level
-Tolerance = 0.01
+Tolerance = 0.0005
 
 
 ###########################################################################
@@ -52,7 +51,8 @@ Tolerance = 0.01
 
 # i) Energy levels
 E_level = input('Which first energy levels do you want (enter an integer) : ')
-E_lvl = E_level.split(',')
+E_level = int(E_level)
+E_lvl = list(range(0,E_level))
 
 # ii) Potential
 potential=input('Potential (as a fonction of x): ')
@@ -69,12 +69,18 @@ while i ==1:
     #Verify if the potential seems to respect the boundaries conditions
     potential = Fct_Numerov.VerifyLimitsPotential(potential)
 
+    #Translate the potential
+    trans_x,trans_y = Fct_Numerov.GetTranslation(potential)
+    potential = Fct_Numerov.TranslatePotential(potential,trans_x,trans_y)
+
     #Convert the potential into a numpy array (see the settings for this potential array in the "Initializing parameters section")
     EvaluatePotential = np.vectorize(Fct_Numerov.EvaluateOnePotential)
     DivisionPotential = (x_V_max - x_V_min) / nbr_division_V
     PositionPotential = np.arange(x_V_min,x_V_max,DivisionPotential)
 
     PotentialArray = EvaluatePotential(PositionPotential,potential)
+
+    #Recenters this new potential array for more accuracy
 
     #Verify the concavity of the potential
     concavity = Fct_Numerov.VerifyConcavity(PotentialArray)
@@ -84,74 +90,85 @@ while i ==1:
         i = 0
     #Else ask for a new one or take this one anyway
     elif concavity == 'negative':
-        potential2 = input('The concavityof the potential isn\'t correct enter a new one (or "O" to overule): ')
+        potential2 = input('The concavity of the potential isn\'t correct enter a new one (or "O" to overule): ')
 
         if potential2 == 'O':
             i = 0
         else :
             potential = potential2
 
-
 ###################################
 # 3) Numerov algorithm
 ###################################
 
-#Initializing constants
-MassElectron = 9.10938215 * (10**(-31))
-HBar = 1.054572 * (10**(-34))
-
 #Initializing paramaters for the while loop
 EnergyLevelFound = {} #Defines energy levels that avec been found. Has the structure {0:E0, 1:E1, 2:E2, ...}
+WaveFunctionFound = {} #defines the wave functions that have been found. Has the structure {0:WaveFunction0, 1:WaveFunction1, ...}
 E_guess_try = {} #Defines the lowest and higest energy levels that have been used so far for each number of nodes. Has the structure {NbrNodes1:[Energy guessed min, Energy guessed max], ...}
-E_First_Guess = (HBar * ((MassElectron)**(-1/2)))/2 #Takes as intial guess the energy level of the quantum harmonic oscillator with k=1
 iteration = 1 #Defines the number of iterations
 
-while not len(EnergyLevelFound) == E_level:
+#Continue while we don't have the n first energy level
+E_found = list()
+
+while not E_found == list(range(E_level)):
+#while not len(E_found) == E_level:
 
     #########################################################
     # i) Initial Energy guess
 
-    E_guess = E_First_Guess if iteration == 1 else Fct_Numerov.E_Guess(EnergyLevelFound,E_guess_try)
+    E_guess = Fct_Numerov.E_Guess(EnergyLevelFound,E_guess_try,iteration)
+    print('E_guess: ', float(E_guess))
 
     ##########################################################
     # ii) Setting the initial and final points (where \psi =0)
 
     #Gets the meeting points with the energy and the potential
-    MeetingPoints = Fct_Numerov.MeetingPointsNumerov(E_guess, PotentialArray, PositionPotential)
+    MeetingPoints = Fct_Numerov.MeetingPointsPotential(E_guess, PotentialArray, PositionPotential)
 
     #Sets the minimum and maximum value for the position where the wave function equals zero
-    Position_min,Position_max = Fct_Numerov.DetermineMinAndMax(MeetingPoints, x_V_min, x_V_max)
+    Position_min,Position_max = Fct_Numerov.DetermineMinAndMax(MeetingPoints)
 
     ###############################################################
     # iii) Calculate the wave fonction for the guessed energy value
 
     WaveFunction = Fct_Numerov.WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, Position_min, Position_max)
 
-    ##########################################################
-    # iv) Determine the number of nodes in the wave fonction
+    ###############################################################################
+    # iv) Determine the number of nodes in the wave fonction and set the tolerance
 
-    NumberOfNodes = Fct_Numerov.NumberNodes(WaveFunction)
-
+    NumberOfNodes,PositionNodes,x_max = Fct_Numerov.NumberNodes(WaveFunction)
+    print('NumberOfNodes:', NumberOfNodes)
 
     ####################################################################################
     # v) See if the wave fonction for this energy respects the restriction (if yes save)
 
-    VerificationTolerance = Fct_Numerov.VerifyTolerance(WaveFunction,Tolerance)
+    VerificationTolerance = Fct_Numerov.VerifyTolerance(WaveFunction,Tolerance,E_guess,E_guess_try,NumberOfNodes)
 
     if VerificationTolerance == 'yes':
-        EnergyLevelFound.update({NumberOfNodes:WaveFunction})
+        print('Niveau d\'energie trouve!!\n\n')
+        NumberOfNodesCorrected = Fct_Numerov.CorrectNodeNumber(NumberOfNodes,PositionNodes,x_max,E_guess,E_guess_try)
+        EnergyLevelFound.update({NumberOfNodesCorrected:E_guess})
+        WaveFunctionFound.update({NumberOfNodesCorrected:WaveFunction})
 
     ######################################################################################
     # vi) Saves Energy guess and the corresponding number of nodes (no matter if it fails)
 
     E_guess_try = Fct_Numerov.SaveEnergy(NumberOfNodes, E_guess, E_guess_try)
+    print('E_guess_try: ',E_guess_try)
 
+    #Increments the iteration
+    print('iterations:',iteration,'\n')
     iteration += 1
 
-##############################################
-#Temporary try to see what the script displays
-for i,Energy in EnergyLevelFound.items():
-    print(i, Energy)
+    ############################################################
+    # vii) Verify if the condition is respected
+    E_found = list()
+    for i in EnergyLevelFound.keys():
+        E_found.append(i)
+    E_found.sort()
+    print('Energy level found',EnergyLevelFound)
+    print('E_found: ',E_found)
+
 
 
 ######################################
@@ -160,4 +177,14 @@ for i,Energy in EnergyLevelFound.items():
 
 # i) Figure
 
+#Draw all the wave functions
+Fct_Numerov.DrawWaveFunction(WaveFunctionFound, EnergyLevelFound)
+
+#Draw the potential
+Fct_Numerov.DrawPotential(PositionPotential, PotentialArray)
+
 # ii) Energy levels
+Fct_Numerov.OuputEnergy(EnergyLevelFound)
+
+#Displays the figure
+Fct_Numerov.DisplayFigure()
