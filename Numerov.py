@@ -182,10 +182,7 @@ while not E_found == list(range(E_level)):
 # i) Figure
 
 #Draw all the wave functions
-Fct_Numerov.DrawWaveFunction(WaveFunctionFound, EnergyLevelFound)
-
-#Draw the potential
-Fct_Numerov.DrawPotential(PositionPotential, PotentialArray)
+Fct_Numerov.DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, PotentialArray)
 
 # ii) Energy levels
 Fct_Numerov.OuputEnergy(EnergyLevelFound)

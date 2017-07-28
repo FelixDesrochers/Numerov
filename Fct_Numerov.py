@@ -6,6 +6,7 @@ sys.path.append('/Users/anaconda/lib/python3.6/site-packages')
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 ######################################################################################
 # 1) Potential functions
@@ -408,7 +409,7 @@ def VerifyTolerance(WaveFunction, Tolerance, E_guess, E_guess_try, NumberOfNodes
     except KeyError:
         pass
     else:
-        if (E_guess < E_plus and E_guess > E_minus) and ((E_minus/E_plus) > 0.999999999) :
+        if (E_guess < E_plus and E_guess > E_minus) and ((E_minus/E_plus) > 0.9999999999) :
             VerificationTolerance = 'yes'
 
     return VerificationTolerance
@@ -461,14 +462,17 @@ def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
 # i) Draw the figure
 
 #Draw the wave Functions, the energy levels and sets the axis limits
-def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound):
+def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, PotentialArray):
 
     #Determine the maximum energy to set the maximum value for the y axis
     E_max = EnergyLevelFound[max(EnergyLevelFound)]
     y_max = 1.15* E_max
-    Y_by_E_level = 0.7*(y_max/(max(EnergyLevelFound)+1))
+    Y_by_E_level = (y_max/(max(EnergyLevelFound)+2))
 
-    #Draw wave functions
+    #Define a new figure with two subplot: the energy levels and the corresponding wave function
+    f,(En,Wav) = plt.subplots(1,2,sharey=True)
+
+    # i) Draw the wave functions
     for i in WaveFunctionFound.keys():
         x =[]
         y= []
@@ -479,31 +483,59 @@ def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound):
         x = np.array(x)
         y = np.array(y)
 
-        mult = (Y_by_E_level)/(2 * y.max())
-        y = mult * y + EnergyLevelFound[i]
-        plt.plot(x,y,'b')
-
-        #Draw the Energy guess
-        for j in range(len(x)):
-            y[j] = EnergyLevelFound[i]
-
-        plt.plot(x,y,'g--')
+        mult = (0.9 * Y_by_E_level)/(2 * y.max())
+        y = mult * y + (Y_by_E_level * (i+1))
+        Wav.plot(x,y,'b',label=r"$\psi(x)$",zorder=3)
 
     #Determines the min and max in x
     min_x = x.min()
     max_x = x.max()
 
-    #Determine the max in y
-    #max_y = (1.1 * y.max())
+    #Draw line to specify wher the wave function is centered
+    for i in WaveFunctionFound.keys():
+        for j in range(len(x)):
+            y[j] = (Y_by_E_level * (i+1))
+        Wav.plot(x,y,'k--',zorder=1)
 
     #Sets the axis limits
-    plt.axis([min_x, max_x, 0, y_max])
+    Wav.axis([min_x, max_x, 0, y_max])
 
-    #Draw the Energy guess
-    for j in range(len(x)):
-        y[j] = EnergyLevelFound[i]
+    #Draw the potential
+    Wav.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=2)
 
-    plt.plot(x,y,'g--')
+    # ii) Draw the Energy levels
+    for i in WaveFunctionFound.keys():
+        for j in range(len(x)):
+            y[j] = EnergyLevelFound[i]
+        PlotColor = cm.hot(i/len(WaveFunctionFound))
+        En.plot(x,y,'--',color=PlotColor,label='E'+str(i))
+
+    #Set the axis limit
+    En.axis([min_x, max_x, 0, y_max])
+
+    #Draw the potential
+    En.plot(PositionPotential, PotentialArray, 'r',label='Potential')
+
+    # iii) Sets differents esthetic components like the legend
+
+    #For the wave function
+    Wav.set_xlabel(r'x ($a_0$)')
+    Wav.set_title('Wave Function')
+
+    #Verify if the labels reappear multiple times
+    handles, labels = plt.gca().get_legend_handles_labels()
+    newLabels, newHandles = [], []
+    for handle, label in zip(handles, labels):
+        if label not in newLabels:
+            newLabels.append(label)
+            newHandles.append(handle)
+    Wav.legend(newHandles, newLabels, loc='upper right')
+
+    #For the energy levels
+    En.set_xlabel(r'x ($a_0$)')
+    En.set_ylabel('Energy (Hartree)')
+    En.set_title('Energy levels')
+    En.legend(loc='upper right')
 
 
 #Draw the potential
