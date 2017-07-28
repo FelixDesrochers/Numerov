@@ -31,18 +31,18 @@ import Fct_Numerov
 #Indication :Theses parameters determine the precision of the calculations and can be adjust as wanted
 
 #Setting the range from wich we will evaluate the potential and teh number of division we will include
-x_V_min = -(10**(-9))
-x_V_max = (10**(-9))
-nbr_division_V = 500000
+x_V_min = -5
+x_V_max = 5
+nbr_division_V = 1000000
 
 #Setting the number of division from the initial point in the classical forbidden zone x_0 t the ending point x_max
-nbr_division = 15000
+nbr_division = 10000
 
 #Setting the initial augmentation after the point where the wave function will be set to zero
 Initial_augmentation = 0.00001
 
 #Setting the tolerance for the wave fonction at the ending point (x_max) to accept the energy level as the wnated energy level
-Tolerance = 0.0005
+Tolerance = 0.00000001
 
 
 ###########################################################################
@@ -71,7 +71,7 @@ while i ==1:
 
     #Translate the potential
     trans_x,trans_y = Fct_Numerov.GetTranslation(potential)
-    potential = Fct_Numerov.TranslatePotential(potential,trans_x,trans_y)
+    potential = Fct_Numerov.TranslatePotential(potential,trans_x, trans_y)
 
     #Convert the potential into a numpy array (see the settings for this potential array in the "Initializing parameters section")
     EvaluatePotential = np.vectorize(Fct_Numerov.EvaluateOnePotential)
@@ -81,9 +81,13 @@ while i ==1:
     PotentialArray = EvaluatePotential(PositionPotential,potential)
 
     #Recenters this new potential array for more accuracy
+    #PotentialArray,PositionPotential = Fct_Numerov.RecenterPotential(PotentialArray,PositionPotential)
+
+    #Defines the initial Energy guess that will be used to verify the concavity
+    First_E_guess = Fct_Numerov.GetFirstEnergyGuess(PotentialArray)
 
     #Verify the concavity of the potential
-    concavity = Fct_Numerov.VerifyConcavity(PotentialArray)
+    concavity,First_E_guess = Fct_Numerov.VerifyConcavity(PotentialArray, First_E_guess)
 
     #If it is correct exit the loop
     if concavity == 'positive':
@@ -116,7 +120,7 @@ while not E_found == list(range(E_level)):
     #########################################################
     # i) Initial Energy guess
 
-    E_guess = Fct_Numerov.E_Guess(EnergyLevelFound,E_guess_try,iteration)
+    E_guess = Fct_Numerov.E_Guess(EnergyLevelFound,E_guess_try,iteration, First_E_guess)
     print('E_guess: ', float(E_guess))
 
     ##########################################################
