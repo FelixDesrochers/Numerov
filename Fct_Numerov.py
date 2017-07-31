@@ -1,4 +1,3 @@
-
 #Importing the necessary modules
 import sys
 sys.path.append('/Users/anaconda/lib/python3.6/site-packages')
@@ -7,6 +6,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib import animation
 
 ######################################################################################
 # 1) Potential functions
@@ -461,39 +461,64 @@ def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
 ############################
 # i) Draw the figure
 
-#Draw the wave Functions, the energy levels and sets the axis limits
-def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, PotentialArray):
+#Define the wave funcions to plot, the lines corresponding to these wave function and the energy lines
+def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
 
-    #Determine the maximum energy to set the maximum value for the y axis
+    # i) Determine the maximum energy to set the maximum value for the y axis
     y_max = 1.1*EnergyLevelFound[max(EnergyLevelFound)]
     Y_by_E_level = (y_max/(max(EnergyLevelFound)+2))
+
+    # ii) For the wave function
+    WavPlot = []
+    for i in WaveFunctionFound.keys():
+        x=[]
+        y=[]
+        for j in range(800,len(WaveFunctionFound[i])-800):
+            if not (j > 7500 and math.fabs(WaveFunctionFound[i][j][1]) > (max(y)*0.5)):
+                x.append(WaveFunctionFound[i][j][0])
+                y.append(WaveFunctionFound[i][j][1])
+        x = np.array(x)
+        y = np.array(y)
+
+        mult = (0.9 * Y_by_E_level)/(2 * y.max())
+        y = (mult * y) + (Y_by_E_level * (i+1))
+        WavPlot.append((x,y))
+
+    # iii) Determines the min and max in x
+    min_x = x.min()
+    max_x = x.max()
+
+    # iv) Get lines to where the wave function is centered
+    WavLines = []
+    for i in WaveFunctionFound.keys():
+        Wav_line_y=[]
+        for j in range(len(x)):
+            Wav_line_y.append(Y_by_E_level * (i+1))
+        WavLines.append((x,Wav_line_y))
+
+
+    # v) get lines for all the Energy levels
+    EnergyLines = []
+    for i in WaveFunctionFound.keys():
+        En_y = []
+        for j in range(len(x)):
+            En_y.append(EnergyLevelFound[i])
+        EnergyLines.append((x,En_y))
+
+    return y_max, min_x, max_x, WavPlot, WavLines, EnergyLines
+
+
+#Draw the wave Functions, the energy levels and sets the axis limits
+def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, PositionPotential, PotentialArray):
 
     #Define a new figure with two subplot: the energy levels and the corresponding wave function
     f,(En,Wav) = plt.subplots(1,2,sharey=True)
 
     # i) Draw the wave functions
-    for i in WaveFunctionFound.keys():
-        x =[]
-        y= []
-        for j in range(1300,len(WaveFunctionFound[i])-1300):
-            x.append(WaveFunctionFound[i][j][0])
-            y.append(WaveFunctionFound[i][j][1])
-
-        x = np.array(x)
-        y = np.array(y)
-
-        mult = (0.9 * Y_by_E_level)/(2 * y.max())
-        y = mult * y + (Y_by_E_level * (i+1))
+    for x,y in WavPlot:
         Wav.plot(x,y,'b',label=r"$\psi(x)$",zorder=3)
 
-    #Determines the min and max in x
-    min_x = x.min()
-    max_x = x.max()
-
-    #Draw line to specify wher the wave function is centered
-    for i in WaveFunctionFound.keys():
-        for j in range(len(x)):
-            y[j] = (Y_by_E_level * (i+1))
+    for x,y in WavLines:
         Wav.plot(x,y,'k--',zorder=1)
 
     #Sets the axis limits
@@ -503,11 +528,11 @@ def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, Pot
     Wav.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=2)
 
     # ii) Draw the Energy levels
-    for i in WaveFunctionFound.keys():
-        for j in range(len(x)):
-            y[j] = EnergyLevelFound[i]
-        PlotColor = cm.viridis(i/len(WaveFunctionFound))
+    i = 1
+    for x,y in EnergyLines:
+        PlotColor = cm.viridis(i/len(EnergyLines))
         En.plot(x,y,'--',color=PlotColor,label='E'+str(i),zorder=2)
+        i+=1
 
     #Set the axis limit
     En.axis([min_x, max_x, 0, y_max])
@@ -535,6 +560,17 @@ def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, Pot
     En.set_ylabel('Energy (Hartree)')
     En.set_title('Energy levels')
     En.legend(loc='upper right')
+
+    #################################
+    #Animate the wave function
+    # initialization function: plot the background of each frame
+    #ax = plt.axes(xlim=(0, 2), ylim=(-2, 2))
+    #line, = ax.plot([], [], lw=2)
+
+    #def init():
+    #    line.set_data([], [])
+    #    return line,
+
 
 
 #Draw the potential

@@ -181,8 +181,11 @@ while not E_found == list(range(E_level)):
 
 # i) Figure
 
+#Get all the information about what to draw
+y_max,min_x,max_x,WavPlot,WavLines,EnergyLines = Fct_Numerov.DefineWhatToPlot(WaveFunctionFound,EnergyLevelFound)
+
 #Draw all the wave functions
-Fct_Numerov.DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, PotentialArray)
+Fct_Numerov.DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, PositionPotential, PotentialArray)
 
 # ii) Energy levels
 Fct_Numerov.OuputEnergy(EnergyLevelFound)
