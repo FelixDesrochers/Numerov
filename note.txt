@@ -1,0 +1,15 @@
+1) Enlever points trop élevé à la fin de la fonction d'onde (Filtrer avant de diplya le graphique)
+
+2) Ajouter dans graphique :
+    -Fixer bug (vide blanc en haut de graphique)
+    -mettre indication E et \psi directement dur le grahique
+    -fonc blanc à légende
+    -bloc avec les énergies exactes
+
+3) Ajouter blox try, except dans find Meeting points afin de prolonger potentiel si fonctionne pas
+
+4) Ajouter animation pour voir partie réelle  et imaginaire de la fonction d'onde bouger
+
+5) Ajouter pour potentiel carré
+
+

@@ -31,8 +31,8 @@ import Fct_Numerov
 #Indication :Theses parameters determine the precision of the calculations and can be adjust as wanted
 
 #Setting the range from wich we will evaluate the potential and teh number of division we will include
-x_V_min = -5
-x_V_max = 5
+x_V_min = -12
+x_V_max = 12
 nbr_division_V = 1000000
 
 #Setting the number of division from the initial point in the classical forbidden zone x_0 t the ending point x_max

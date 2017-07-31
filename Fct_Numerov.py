@@ -465,8 +465,7 @@ def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
 def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, PotentialArray):
 
     #Determine the maximum energy to set the maximum value for the y axis
-    E_max = EnergyLevelFound[max(EnergyLevelFound)]
-    y_max = 1.15* E_max
+    y_max = 1.1*EnergyLevelFound[max(EnergyLevelFound)]
     Y_by_E_level = (y_max/(max(EnergyLevelFound)+2))
 
     #Define a new figure with two subplot: the energy levels and the corresponding wave function
@@ -476,7 +475,7 @@ def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, Pot
     for i in WaveFunctionFound.keys():
         x =[]
         y= []
-        for j in range(2000,len(WaveFunctionFound[i])-2000):
+        for j in range(1300,len(WaveFunctionFound[i])-1300):
             x.append(WaveFunctionFound[i][j][0])
             y.append(WaveFunctionFound[i][j][1])
 
@@ -507,14 +506,14 @@ def DrawWaveFunction(WaveFunctionFound, EnergyLevelFound, PositionPotential, Pot
     for i in WaveFunctionFound.keys():
         for j in range(len(x)):
             y[j] = EnergyLevelFound[i]
-        PlotColor = cm.hot(i/len(WaveFunctionFound))
-        En.plot(x,y,'--',color=PlotColor,label='E'+str(i))
+        PlotColor = cm.viridis(i/len(WaveFunctionFound))
+        En.plot(x,y,'--',color=PlotColor,label='E'+str(i),zorder=2)
 
     #Set the axis limit
     En.axis([min_x, max_x, 0, y_max])
 
     #Draw the potential
-    En.plot(PositionPotential, PotentialArray, 'r',label='Potential')
+    En.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=1)
 
     # iii) Sets differents esthetic components like the legend
 
