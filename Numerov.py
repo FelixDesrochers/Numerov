@@ -18,7 +18,6 @@ ending point and the number of division'''
 import sys
 sys.path.append('/Users/felix/anaconda/lib/python3.6/site-packages')
 
-import math
 import numpy as np
 
 #Imports the Fct_Numerov module which defines many functions that will be used in this script

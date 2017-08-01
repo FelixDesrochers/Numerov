@@ -2,11 +2,11 @@
 import sys
 sys.path.append('/Users/anaconda/lib/python3.6/site-packages')
 
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib import animation
+
 
 ######################################################################################
 # 1) Potential functions
@@ -26,7 +26,7 @@ def ModifyPotential(potential):
     #Replacing absolute value
     pot_list = potential.rsplit('|')
     for i in [ i for i in range(1,(len(pot_list)-1)*2) if i%2==1 ]:
-        insertion = 'math.fabs(' if i%4 ==1 else ')'
+        insertion = 'np.absolute(' if i%4 ==1 else ')'
         pot_list.insert(i,insertion)
 
     potential=''.join(pot_list)
@@ -399,7 +399,7 @@ def VerifyTolerance(WaveFunction, Tolerance, E_guess, E_guess_try, NumberOfNodes
     '''See if the wave function for the given energy level respects the tolerance. Returns yes if it respects the tolerance and no if not.'''
 
     # i) Checks if the last value of the wave function respects the tolerance
-    VerificationTolerance = 'yes' if math.fabs(WaveFunction[-1][1]) < Tolerance else 'no'
+    VerificationTolerance = 'yes' if np.absolute(WaveFunction[-1][1]) < Tolerance else 'no'
     print('Last value Wave Function: ', WaveFunction[-1][1])
 
     # ii) Checks if the energy guess doesn't change a lot
@@ -474,7 +474,7 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
         x=[]
         y=[]
         for j in range(800,len(WaveFunctionFound[i])-800):
-            if not (j > 7500 and math.fabs(WaveFunctionFound[i][j][1]) > (max(y)*0.5)):
+            if not (j > 7500 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.5)):
                 x.append(WaveFunctionFound[i][j][0])
                 y.append(WaveFunctionFound[i][j][1])
         x = np.array(x)
@@ -514,9 +514,13 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Define a new figure with two subplot: the energy levels and the corresponding wave function
     f,(En,Wav) = plt.subplots(1,2,sharey=True)
 
+    #Set figure title
+    f.suptitle("Schrodinger equation solutions",fontsize=20,fontweight='bold')
+
     # i) Draw the wave functions
-    for x,y in WavPlot:
-        Wav.plot(x,y,'b',label=r"$\psi(x)$",zorder=3)
+    lines = [Wav.plot(x,y,'b',label=r"$Re(\psi(x))$",zorder=3)[0] for x,y in WavPlot]
+    lines2 =  [Wav.plot(x,y,'m',label=r"$Im(\psi(x))$",zorder=3)[0] for x,y in WavPlot]
+
 
     for x,y in WavLines:
         Wav.plot(x,y,'k--',zorder=1)
@@ -563,15 +567,26 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
     #################################
     #Animate the wave function
-    # initialization function: plot the background of each frame
-    #ax = plt.axes(xlim=(0, 2), ylim=(-2, 2))
-    #line, = ax.plot([], [], lw=2)
 
-    #def init():
-    #    line.set_data([], [])
-    #    return line,
+    def init():
+        for line in lines:
+            line.set_data([], [])
+        return lines
 
+    def UpdateData(t):
+        for j,line in enumerate(lines):
+            x = WavPlot[j][0]
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/15)) + (WavLines[j][1][0])
+            line.set_data(x,y)
+        for j,line in enumerate(lines2):
+            x = WavPlot[j][0]
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/15)) + (WavLines[j][1][0])
+            line.set_data(x,y)
 
+        return lines,lines2
+
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=20, blit=False)
+    plt.show()
 
 #Draw the potential
 def DrawPotential(PositionPotential, PotentialArray):
