@@ -1,15 +1,21 @@
-1) Enlever points trop élevé à la fin de la fonction d'onde (Filtrer avant de diplya le graphique)
+# Notes personnelles concernant les modifications ou idées à apporter au programme
+
+1) Enlever points trop élevé à la fin de la fonction d'onde (Filtrer avant de display le graphique)
 
 2) Ajouter dans graphique :
-    -Fixer bug (vide blanc en haut de graphique)
-    -mettre indication E et \psi directement dur le grahique
+    -Fixer bug (vide blanc en haut de graphique) [check]
+    -mettre indication E et \psi directement dur le grahique [check] (Voir pour être certain si met E ou pas)
     -fonc blanc à légende
     -bloc avec les énergies exactes
 
-3) Ajouter blox try, except dans find Meeting points afin de prolonger potentiel si fonctionne pas
+3) Ajouter bloc try, except dans find Meeting points afin de prolonger potentiel si fonctionne pas
 
-4) Ajouter animation pour voir partie réelle  et imaginaire de la fonction d'onde bouger
+4) Ajouter animation pour voir partie réelle  et imaginaire de la fonction d'onde bouger [Check]
 
 5) Ajouter pour potentiel carré
 
+6) Fixer commentaires et docstring
 
+7) Optimiser le code
+
+8) Ajouter pdf de documentation

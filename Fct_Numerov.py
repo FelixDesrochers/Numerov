@@ -1,7 +1,17 @@
-#Importing the necessary modules
-import sys
-sys.path.append('/Users/anaconda/lib/python3.6/site-packages')
+"""
+Module for the Numerov Scrodinger equation solver
 
+Description: This module defines all the necessary functions that are used in the main script Numerov.py
+
+author: Félix Desrochers
+email: felix.desrochers@polymtl.ca
+license: copyleft
+Feel free to modify and improve this code, but preserve any derivative of it open source and keep the information above. Thanks!
+"""
+
+####################################
+#Importing the necessary modules
+####################################
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -15,10 +25,20 @@ from matplotlib import animation
 
 
 def ModifyPotential(potential):
-    '''This fonction replaces any mathematical expression that is usually used but that is incorect in python.
-    For instance:
-        x^2 -> x**2
-        |x| -> math.fabs(x)'''
+    """This fonction replaces any mathematical expression that is usually used but that is incorect in python.
+
+    Parameters:
+    ----------
+        potential (str) : a string that indicates the mathematical form of the potential
+
+    Returns:
+    --------
+        potential (str) : a new potential that now has changed any mathematical expression that is usually used but that is incorrect in python
+        For instance:
+            x^2 -> x**2
+            |x| -> math.fabs(x)
+
+    """
 
     #Relacing exponential
     potential = potential.replace('^','**')
@@ -31,14 +51,30 @@ def ModifyPotential(potential):
 
     potential=''.join(pot_list)
 
+    #Replacing trigonometric functions
+    potential = potential.replace('cos','np.cos')
+    potential = potential.replace('sin','np.sin')
+    potential = potential.replace('tan','np.tan')
+
     return potential
 
 
 def VerifySyntaxPotential(potential):
-    ''' Verify if the potential entered has an invalid syntax and demands another potential untils there is no more syntax error '''
+    """ Verify if the potential entered has an invalid syntax and demands another potential untils there is no more syntax error
+
+    Parameters:
+    -----------
+        potential (str) : a string that indicates the mathematical form of the potential
+
+    Returns:
+    --------
+        potential (str) : a new string with a valid python mathematical syntax
+
+    """
+
     i=0
     while i == 0:
-        #Tries to evaluate the potential at x=0 and asks for a new one until there is a syntax error
+        #Tries to evaluate the potential at x=0 and asks for a new one until there is no more syntax error
         try:
             x=0
             eval(potential)
@@ -52,7 +88,18 @@ def VerifySyntaxPotential(potential):
 
 
 def VerifyLimitsPotential(potential):
-    '''Verify if the potential seems to verify the borders conditions (to allow bound states) if it doesn't it ask to the user if he is sure that the potential respects these conditions'''
+    """Verify if the potential seems to verify the borders conditions (to allow bound states). If it doesn't it ask to the user if he is sure that the potential respects these conditions
+
+    Parameters:
+    -----------
+        potential (str) : a string that indicates the mathematical form of the potential
+
+    Returns:
+    --------
+        potential (str) : a new string with a valid python mathematical syntax and with value bigger than V(x=0) for x=-100 and x=100
+
+    """
+
     #Verify if the potential is bigger than V(x=0) for x=100 and x=-100
     i=1
     while i == 1:
@@ -63,7 +110,8 @@ def VerifyLimitsPotential(potential):
         eval_pot.append(eval(potential))
         eval_pot = np.array(eval_pot)
         x = 0
-        #if it doesn't ask for a new potential
+
+        #if it doesn't respect the condition ask for a new potential
         if eval_pot[eval_pot < eval(potential)]:
             QuestionPotential = input('The potential doesn\'t seem to be correct. Are you it corresponds to a bound state (y/n)? ')
 
@@ -83,7 +131,19 @@ def VerifyLimitsPotential(potential):
 
 
 def GetFirstEnergyGuess(PotentialArray):
-    '''Defines the first energy level as a value between the the average potential and the minimum value. More explicitly: (1/50000)*((V_average + V_min)/2)'''
+    """Defines the first energy level as a value between the the average potential and the minimum value. More explicitly: (1/50000)*((V_average + V_min)/2)
+
+
+    Parameters:
+    -----------
+        PotentialArray (numpy.ndarray) : a numpy array that contains the potential value between 'x_V_min' and 'x_V_max' at every interval of length 'Division'
+
+    Returns:
+    --------
+        First_E_guess (float) : the first energy guess that will be used in the Numerov algorithm. It correponds to the average of the minimum value of the potential and the average of the
+                                potential times 1/50000
+
+    """
 
     First_E_guess = PotentialArray.min() +  (1/500000) * (PotentialArray.mean() + PotentialArray.min())
 
@@ -91,17 +151,35 @@ def GetFirstEnergyGuess(PotentialArray):
 
 
 def VerifyConcavity(PotentialArray, First_E_guess):
-    '''Evaluates the concavity of the potential and returns its value positive if the concavity is correct or negative if it is incorrect'''
+    """Evaluates the concavity of the potential and returns its value: positive if the concavity is correct or negative if it is incorrect. To be positive, the smallest meeting
+    point of an energy guess with the potential needs to have a negative derivative and the greatest meeting point needs to have a positive one. If the function finds no meeting point
+    then tries a smaller energy guess and restarts the process
+
+
+    Parameters:
+    -----------
+        PotentialArray (numpy.ndarray) : a numpy array that contains the potential value between 'x_V_min' and 'x_V_max' at every interval of length 'Division'
+
+        First_E_guess (float) : the first energy guess that will be used in the Numerov algorithm
+
+    Returns:
+    --------
+        concavity (str) : a string that indicates the global concavity of the potential. It can either be positive if it respects the condition or negative if it doesn't
+
+    """
 
     i = 1
-
+    #Continue while it doesn't find meeting points
     while i == 1:
         print('First Energy guess:', First_E_guess)
         index_min=list()
         index_max=list()
+
+        #Tries to find meeting points and to compare them
         try:
             for i in range(0,len(PotentialArray)-2):
-                #Gets all the points where the potential meets the E_verify value
+
+                #Gets all the points where the potential meets the E_verify value and filters them depending on their derivatives
                 if PotentialArray[i] > First_E_guess and PotentialArray[i+1] < First_E_guess:
                     index_min.append(i)
 
@@ -115,21 +193,20 @@ def VerifyConcavity(PotentialArray, First_E_guess):
                     elif PotentialArray[i-1] < First_E_guess and PotentialArray[i+1] > First_E_guess:
                         index_max.append(i)
 
-            #Gets the concavity value
-            index_max = np.array(index_max)
-            index_min = np.array(index_min)
-
+            #Defines the concavity value depending on
             print('index max: ',index_max)
             print('index_min: ',index_min)
 
-            if (index_max.max() > index_min.max()) and (index_max.min() > index_min.min()):
+            if (max(index_max) > max(index_min)) and (min(index_max) > min(index_min)):
                 concavity = 'positive'
             else:
                 concavity = 'negative'
 
+        #If we are not able to compare the potential, we define a new energy guess
         except ValueError:
             First_E_guess = First_E_guess/2
 
+        #If it is able to compare them, exit the loop
         else:
             i = 0
 
@@ -137,35 +214,56 @@ def VerifyConcavity(PotentialArray, First_E_guess):
 
 
 def EvaluateOnePotential(position,potential):
-    '''Defines a function that evaluate the potential at a certain point x. This function will be vectorized with np.vectorize to evaluate the potential on a list of position [x1,x2,...]'''
+    """Defines a function that evaluate the potential at a certain point x. This function will be vectorized with np.vectorize to evaluate the potential on a list of position [x1,x2,...]
+
+    Parameters:
+    -----------
+        position (float) : a float that defines the x position where we want to evaluate the potential
+
+        potential (str) : a string that defines the mathematical expression of the potential
+
+    Returns:
+    --------
+        EvalPotential (float) : the potential value at the x position
+
+    """
+
     x = position
     EvalPotential = eval(potential)
 
     return EvalPotential
 
-def GetTranslation(potential):
-    '''Checks approximately where the minimum of the potential is and outputs the necessary translation in x and y to recenter the minimum at x=0 and y=0'''
+def TranslationPotential(PositionPotential, PotentialArray):
+    """Checks approximately where the minimum of the potential is and outputs the necessary translation in x and y to recenter the minimum at x=0 and y=0
 
-    #i) Create a potential Array
-    Nbr_Div = 50000
-    x_min = -2
-    x_max = 2
-    Div = (x_max - x_min)/Nbr_Div
-    y = list()
+    Parameters:
+    -----------
+        potential (str) : a string that defines the mathematical expression of the potential
 
-    for i in range(Nbr_Div):
-        position = x_min + (Div * i)
-        y.append(EvaluateOnePotential(position,potential))
+    Returns:
+    --------
+        trans_x (float) : the necessary x translation to replace the minimum of the potential at x=0
 
-    #ii) Gets the minimum value for the potential
-    trans_y = min(y)
-    index = y.index(trans_y)
-    trans_x = x_min + (Div * index)
+        trans_y (float) : the necessary y translation to be sure that all the potential values are positive
 
-    print('trans_x; ',trans_x)
+    """
+
+    # i) Gets the minimum value for the potential and the translation in y
+    trans_y = PotentialArray.min()
+    #index = float(np.where(PotentialArray==trans_y)[0])
+
+    # ii) Defines the necessary translation in x
+    #trans_x = x_min + (Div * index)
+    #trans_x = PositionPotential[index]
+
+    # iii) Translates the potential
+    PotentialArray = PotentialArray - trans_y
+    #PositionPotential = PositionPotential - trans_x
+
+    #print('trans_x; ',trans_x)
     print('trans_y; ',trans_y)
 
-    return trans_x,trans_y
+    return PositionPotential, PotentialArray
 
 def TranslatePotential(potential,trans_x,trans_y):
     '''Modify the potential expression to center its minimum at x=0 and y=0'''
@@ -259,16 +357,19 @@ def E_Guess(EnergyLevelFound, E_guess_try, iteration, First_E_guess):
 # ii) Setting the minimal and maximal points (where the wave function equals zero)
 
 def MeetingPointsPotential(E_guess, PotentialArray, PositionPotential):
-    '''Finds the minimal and maximal points where the energy that has been guessed is equal to the potential.
+    """Finds the minimal and maximal points where the energy that has been guessed is equal to the potential.
+
     Parameters:
+    -----------
         E_guess: the guessed energy
         PotentialArray: a Numpy array that contains the potential for certain points
         PositionPotential: a Numpy array that contains the positions that correspond to the potential array
+
     Returns:
-        MeetingPoints: a tuple of the smallest and biggest meeting point'''
+    --------
+        MeetingPoints: a tuple of the smallest and biggest meeting point"""
 
     MeetingPoints = [None,None] # a list containing the smallest and highest meeting point
-
     for i in range(0,len(PotentialArray)-2):
         #Gets all the meeting points
         if (PotentialArray[i] < E_guess and PotentialArray[i+1] > E_guess) or (PotentialArray[i] > E_guess and PotentialArray[i+1] < E_guess) or PotentialArray[i] == E_guess:
@@ -281,9 +382,10 @@ def MeetingPointsPotential(E_guess, PotentialArray, PositionPotential):
                 print('index renccontre max: ', i)
 
     MeetingPoints = tuple(MeetingPoints)
+
     return MeetingPoints
 
-def DetermineMinAndMax(MeetingPoints):
+def DetermineMinAndMax(MeetingPoints, E_guess, E_guess_try, PotentialArray, PositionPotential):
     '''This function determines the minimal and maximal position where the wave function will be set to 0 depending on the points where the potential meets the guess energy and on
     the minimum and maximum that are initially set for the potential
 
@@ -297,15 +399,27 @@ def DetermineMinAndMax(MeetingPoints):
         Position_max: the maximum value where psi=0'''
 
     #Sets the min and max as the half of the distance between the min and the max plus the min or the max
+    i = 1
+    iteration = 1
+    end_program = False
 
+    while i == 1:
+        try:
+            Position_min = MeetingPoints[0] - (MeetingPoints[1] - MeetingPoints[0])/1
+            Position_max =  MeetingPoints[1] + (MeetingPoints[1] - MeetingPoints[0])/1
+        except:
+            E_guess = (E_guess + max([k for j,k in E_guess_try.values() if k < E_guess]))/2
+            iteration += 1
+            MeetingPoints = MeetingPointsPotential(E_guess, PotentialArray, PositionPotential)
+            if iteration > 10:
+                end_program = True
+        else:
+            i = 0
+            print('MeetingPoint: ', MeetingPoints)
+            print('min:',Position_min)
+            print('max:',Position_max)
 
-    Position_min = MeetingPoints[0] - (MeetingPoints[1] - MeetingPoints[0])/1
-    Position_max =  MeetingPoints[1] + (MeetingPoints[1] - MeetingPoints[0])/1
-
-    print('MeetingPoint: ', MeetingPoints)
-    print('min:',Position_min)
-    print('max:',Position_max)
-    return Position_min,Position_max
+    return Position_min,Position_max, end_program
 
 #######################################
 # iii) Calculate the wave function
@@ -474,7 +588,7 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
         x=[]
         y=[]
         for j in range(800,len(WaveFunctionFound[i])-800):
-            if not (j > 7500 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.5)):
+            if not (j > 7500 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.07)):
                 x.append(WaveFunctionFound[i][j][0])
                 y.append(WaveFunctionFound[i][j][1])
         x = np.array(x)
@@ -511,16 +625,17 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
 #Draw the wave Functions, the energy levels and sets the axis limits
 def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, PositionPotential, PotentialArray):
 
-    #Define a new figure with two subplot: the energy levels and the corresponding wave function
+    ###################################################################################################
+    # i) Define a new figure with two subplot: the energy levels and the corresponding wave function
     f,(En,Wav) = plt.subplots(1,2,sharey=True)
 
     #Set figure title
-    f.suptitle("Schrodinger equation solutions",fontsize=20,fontweight='bold')
+    f.suptitle("Schrödinger equation solutions",fontsize=20,fontweight='bold')
 
-    # i) Draw the wave functions
+    ################################
+    # ii) Draw the wave functions
     lines = [Wav.plot(x,y,'b',label=r"$Re(\psi(x))$",zorder=3)[0] for x,y in WavPlot]
     lines2 =  [Wav.plot(x,y,'m',label=r"$Im(\psi(x))$",zorder=3)[0] for x,y in WavPlot]
-
 
     for x,y in WavLines:
         Wav.plot(x,y,'k--',zorder=1)
@@ -531,7 +646,8 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Draw the potential
     Wav.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=2)
 
-    # ii) Draw the Energy levels
+    ################################
+    # iii) Draw the Energy levels
     i = 1
     for x,y in EnergyLines:
         PlotColor = cm.viridis(i/len(EnergyLines))
@@ -544,29 +660,36 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Draw the potential
     En.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=1)
 
-    # iii) Sets differents esthetic components like the legend
+    ####################################################
+    # iv) Sets differents esthetic components
 
-    #For the wave function
+    #For the wave function set the title and the axis title
     Wav.set_xlabel(r'x ($a_0$)')
-    Wav.set_title('Wave Function')
+    Wav.set_title('Wave Function',fontsize=14)
 
-    #Verify if the labels reappear multiple times
+    #Verify if the labels reappear multiple times and set legend for the wave function
     handles, labels = plt.gca().get_legend_handles_labels()
     newLabels, newHandles = [], []
     for handle, label in zip(handles, labels):
         if label not in newLabels:
             newLabels.append(label)
             newHandles.append(handle)
-    Wav.legend(newHandles, newLabels, loc='upper right')
+    leg1 = Wav.legend(newHandles, newLabels, fancybox=True, loc='upper right')
+    leg1.get_frame().set_alpha(1)
 
-    #For the energy levels
+    #Identify each wave function
+    for i in range(len(EnergyLines)):
+        Wav.text(((max_x - min_x) * 0.04) + min_x, WavLines[i][1][0] - (0.2 * (y_max/(len(EnergyLines)+2))), r'$\Psi_{%s}(x)$'%(i))
+
+    #For the energy levels set the title, the axis title and the legend
     En.set_xlabel(r'x ($a_0$)')
     En.set_ylabel('Energy (Hartree)')
-    En.set_title('Energy levels')
-    En.legend(loc='upper right')
+    En.set_title('Energy levels',fontsize=14)
+    leg2 = En.legend(fancybox=True, loc='upper right')
+    leg2.get_frame().set_alpha(1)
 
     #################################
-    #Animate the wave function
+    # v) Animate the wave function
 
     def init():
         for line in lines:
@@ -576,11 +699,11 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     def UpdateData(t):
         for j,line in enumerate(lines):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/15)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/20)) + (WavLines[j][1][0])
             line.set_data(x,y)
         for j,line in enumerate(lines2):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/15)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/20)) + (WavLines[j][1][0])
             line.set_data(x,y)
 
         return lines,lines2
