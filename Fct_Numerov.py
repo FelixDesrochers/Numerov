@@ -806,7 +806,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
     #Identify each wave function
     for i in range(len(EnergyLines)):
-        Wav.text(((max_x - min_x) * 0.04) + min_x, WavLines[i][1][0] - (0.2 * (y_max/(len(EnergyLines)+2))), r'$\Psi_{%s}(x)$'%(i))
+        Wav.text(((max_x - min_x) * 0.04) + min_x, WavLines[i][1][0] - (0.25 * (y_max/(len(EnergyLines)+2))), r'$\Psi_{%s}(x)$'%(i))
 
     #For the energy levels set the title, the axis title and the legend
     En.set_xlabel(r'x ($a_0$)')
@@ -827,16 +827,23 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     def UpdateData(t):
         for j,line in enumerate(lines):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/20)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/23)) + (WavLines[j][1][0])
             line.set_data(x,y)
         for j,line in enumerate(lines2):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/20)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/23)) + (WavLines[j][1][0])
             line.set_data(x,y)
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False)
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=200, )
+
     plt.show()
 
+    #Saving the animation
+    # Set up formatting for the movie files
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=15, bitrate=1800)
+
+    anim.save('Schrod.mp4', writer=writer)
 

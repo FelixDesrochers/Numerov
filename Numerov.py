@@ -31,8 +31,8 @@ import Fct_Numerov
 #Indication :Theses parameters determine the precision of the calculations and can be adjust as wanted
 
 #Setting the range from wich we will evaluate the potential and the number of division we will use to discretise the potential
-x_V_min = -10
-x_V_max = 10
+x_V_min = -13
+x_V_max = 13
 nbr_division_V = 800000
 
 #Setting the number of division from the initial point in the classical forbidden zone x_0 to the ending point x_max
