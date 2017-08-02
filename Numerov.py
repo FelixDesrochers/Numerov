@@ -23,6 +23,7 @@ import numpy as np
 #Imports the Fct_Numerov module which defines many functions that will be used in this script
 import Fct_Numerov
 
+
 ############################
 # 1) Initializing parameters
 ############################
@@ -30,12 +31,12 @@ import Fct_Numerov
 #Indication :Theses parameters determine the precision of the calculations and can be adjust as wanted
 
 #Setting the range from wich we will evaluate the potential and the number of division we will use to discretise the potential
-x_V_min = -5
-x_V_max = 5
-nbr_division_V = 1000000
+x_V_min = -10
+x_V_max = 10
+nbr_division_V = 800000
 
 #Setting the number of division from the initial point in the classical forbidden zone x_0 to the ending point x_max
-nbr_division = 10000
+nbr_division = 5000
 
 #Setting the initial augmentation after the point where the wave function will be set to zero
 Initial_augmentation = 0.00001
@@ -98,6 +99,7 @@ while i ==1:
         else :
             potential = potential2
 
+
 ###################################
 # 3) Numerov algorithm
 ###################################
@@ -123,13 +125,13 @@ while not E_found == list(range(E_level)):
     # ii) Setting the initial and final points (where \psi=0)
 
     #Gets the meeting points with the energy and the potential
-    MeetingPoints = Fct_Numerov.MeetingPointsPotential(E_guess, PotentialArray, PositionPotential)
-
-    #Sets the minimum and maximum value for the position where the wave function equals zero
-    Position_min,Position_max,end_program = Fct_Numerov.DetermineMinAndMax(MeetingPoints, E_guess, E_guess_try, PotentialArray, PositionPotential)
+    MeetingPoints,end_program,E_guess = Fct_Numerov.MeetingPointsPotential(E_guess, PotentialArray, PositionPotential, E_guess_try)
 
     if end_program:
         break
+
+    #Sets the minimum and maximum value for the position where the wave function equals zero
+    Position_min,Position_max = Fct_Numerov.DetermineMinAndMax(MeetingPoints)
 
     ###############################################################
     # iii) Calculate the wave fonction for the guessed energy value
@@ -170,23 +172,21 @@ while not E_found == list(range(E_level)):
         E_found.append(i)
     E_found.sort()
     print('Energy level found',EnergyLevelFound)
-    print('E_found: ',E_found)
-
 
 
 ######################################
 # 4) Output (energy levels and figure)
 ######################################
 
-# i) Figure
+# i) Energy levels
+Fct_Numerov.OuputEnergy(EnergyLevelFound)
+
+# ii) Figure
 #Get all the information about what to draw
 y_max,min_x,max_x,WavPlot,WavLines,EnergyLines = Fct_Numerov.DefineWhatToPlot(WaveFunctionFound,EnergyLevelFound)
 
 #Draw all the wave functions
 Fct_Numerov.DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, PositionPotential, PotentialArray)
 
-# ii) Energy levels
-Fct_Numerov.OuputEnergy(EnergyLevelFound)
 
-#Displays the figure
-#Fct_Numerov.DisplayFigure()
+

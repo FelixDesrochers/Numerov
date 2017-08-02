@@ -9,6 +9,7 @@ license: copyleft
 Feel free to modify and improve this code, but preserve any derivative of it open source and keep the information above. Thanks!
 """
 
+
 ####################################
 #Importing the necessary modules
 ####################################
@@ -159,7 +160,6 @@ def VerifyConcavity(PotentialArray, First_E_guess):
     Parameters:
     -----------
         PotentialArray (numpy.ndarray) : a numpy array that contains the potential value between 'x_V_min' and 'x_V_max' at every interval of length 'Division'
-
         First_E_guess (float) : the first energy guess that will be used in the Numerov algorithm
 
     Returns:
@@ -219,7 +219,6 @@ def EvaluateOnePotential(position,potential):
     Parameters:
     -----------
         position (float) : a float that defines the x position where we want to evaluate the potential
-
         potential (str) : a string that defines the mathematical expression of the potential
 
     Returns:
@@ -243,7 +242,6 @@ def TranslationPotential(PositionPotential, PotentialArray):
     Returns:
     --------
         trans_x (float) : the necessary x translation to replace the minimum of the potential at x=0
-
         trans_y (float) : the necessary y translation to be sure that all the potential values are positive
 
     """
@@ -277,19 +275,6 @@ def TranslatePotential(potential,trans_x,trans_y):
 
     return potential
 
-def RecenterPotential(PositionPotential,PotentialArray):
-    '''Translate the potential array to rencenter it at (0,0) '''
-
-    #Translate the potential array
-    trans_y_2 = -min(PotentialArray)
-    index = list(PotentialArray).index(-trans_y_2)
-    #PotentialArray = PotentialArray + trans_y_2
-
-    #Translate the position potential
-    trans_x_2 = -PositionPotential[index]
-    PositionPotential = PositionPotential + trans_x_2
-
-    return PositionPotential
 
 ##################################################
 # 2) Numerov algorithm functions
@@ -300,9 +285,24 @@ def RecenterPotential(PositionPotential,PotentialArray):
 # i) Initial Energy guess
 
 def E_Guess(EnergyLevelFound, E_guess_try, iteration, First_E_guess):
-    '''Defines the energy guess depending on the energy levels that have been found and on the energy that have already been guessed. '''
+    """Defines the energy guess depending on the energy levels that have been found and on the energy that have already been guessed.
+
+    Parameters:
+    -----------
+        EnergyLevelFound (Dict) : a string that defines the mathematical expression of the potential
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+        iteration (int) : the number of iteration in the Numerov algorithm
+        First_E_guess (float) : the first energy guess. Has been defined preivously.
+
+    Returns:
+    --------
+        E_guess (float) : the energy guess that will be used in the current Numerov algorithm iteration. We always want to find the smallest energy level that hasn't been discovered yet, so
+                          we define it with the previous energy guess that have been made (with E_guess_try).
+
+    """
 
     print('Iteration: ',iteration)
+
     #If it is the first time, return the first energy level of the quantum harmonic oscillator
     if iteration == 1:
         E_guess = First_E_guess  #Takes as intial guess the First_E_guess that has previously been defined
@@ -353,80 +353,108 @@ def E_Guess(EnergyLevelFound, E_guess_try, iteration, First_E_guess):
 
     return E_guess
 
+
 ##################################################################################
 # ii) Setting the minimal and maximal points (where the wave function equals zero)
 
-def MeetingPointsPotential(E_guess, PotentialArray, PositionPotential):
+def MeetingPointsPotential(E_guess, PotentialArray, PositionPotential, E_guess_try):
     """Finds the minimal and maximal points where the energy that has been guessed is equal to the potential.
 
     Parameters:
     -----------
-        E_guess: the guessed energy
-        PotentialArray: a Numpy array that contains the potential for certain points
-        PositionPotential: a Numpy array that contains the positions that correspond to the potential array
+        E_guess (float) : the guessed energy
+        PotentialArray (numpy.darray) : a Numpy array that contains the potential for certain points
+        PositionPotential (numpy.darray) : a Numpy array that contains the positions that correspond to the potential array
 
     Returns:
     --------
-        MeetingPoints: a tuple of the smallest and biggest meeting point"""
+        MeetingPoints (tuple) : a tuple of the smallest and biggest meeting point that has th form (Position_min, Position_max)
+        end_program (bool) : a boolean that defines if we have to exits the Numerov while loop. end _program is true if we have made ten energy guess and still haven't found
+                             two meeting points and is false otherwise.
 
-    MeetingPoints = [None,None] # a list containing the smallest and highest meeting point
-    for i in range(0,len(PotentialArray)-2):
-        #Gets all the meeting points
-        if (PotentialArray[i] < E_guess and PotentialArray[i+1] > E_guess) or (PotentialArray[i] > E_guess and PotentialArray[i+1] < E_guess) or PotentialArray[i] == E_guess:
-            #And filter them
-            if (MeetingPoints[0] == None) or (PositionPotential[i] < MeetingPoints[0]):
-                print('index rencontre min: ',i)
-                MeetingPoints[0] = PositionPotential[i]
-            elif (MeetingPoints[1] == None) or (PositionPotential[i] > MeetingPoints[1]):
-                MeetingPoints[1] = PositionPotential[i]
-                print('index renccontre max: ', i)
+    """
 
-    MeetingPoints = tuple(MeetingPoints)
-
-    return MeetingPoints
-
-def DetermineMinAndMax(MeetingPoints, E_guess, E_guess_try, PotentialArray, PositionPotential):
-    '''This function determines the minimal and maximal position where the wave function will be set to 0 depending on the points where the potential meets the guess energy and on
-    the minimum and maximum that are initially set for the potential
-
-    Parameter:
-        MeetingPoints: the minimum and maximum point where the potentila meets the guessed energy
-        x_V_min: The minimum value of the position for the potential
-        x_V_max: The maximum value of the poisition for the potential
-
-    Returns:
-        Position_min: the minimum value where psi=0
-        Position_max: the maximum value where psi=0'''
-
-    #Sets the min and max as the half of the distance between the min and the max plus the min or the max
-    i = 1
-    iteration = 1
+    #Initializing constant for the while loop
+    p = 1
+    iteration = 0
     end_program = False
 
-    while i == 1:
-        try:
-            Position_min = MeetingPoints[0] - (MeetingPoints[1] - MeetingPoints[0])/1
-            Position_max =  MeetingPoints[1] + (MeetingPoints[1] - MeetingPoints[0])/1
-        except:
+    while p == 1:
+        #Finds all the meeting points
+        MeetingPoints = [None,None]
+        for i in range(0,len(PotentialArray)-2):
+            #Gets all the meeting points
+            if (PotentialArray[i] < E_guess and PotentialArray[i+1] > E_guess) or (PotentialArray[i] > E_guess and PotentialArray[i+1] < E_guess) or (PotentialArray[i] == E_guess):
+                #And filter them
+                if (MeetingPoints[0] == None) or (PositionPotential[i] < MeetingPoints[0]):
+                    print('index rencontre min: ',i)
+                    MeetingPoints[0] = PositionPotential[i]
+                elif (MeetingPoints[1] == None) or (PositionPotential[i] > MeetingPoints[1]):
+                    MeetingPoints[1] = PositionPotential[i]
+                    print('index renccontre max: ', i)
+
+        #If we have not found at least two meeting points, then make a new smaller energy guess and repeat for at most ten times
+        if (MeetingPoints[0] == None) or (MeetingPoints[1] == None):
+            print('Restting the energy guess!\n')
             E_guess = (E_guess + max([k for j,k in E_guess_try.values() if k < E_guess]))/2
             iteration += 1
-            MeetingPoints = MeetingPointsPotential(E_guess, PotentialArray, PositionPotential)
+            print('E_guess: ',E_guess)
             if iteration > 10:
                 end_program = True
+                break
         else:
-            i = 0
-            print('MeetingPoint: ', MeetingPoints)
-            print('min:',Position_min)
-            print('max:',Position_max)
+            p = 0
+            MeetingPoints = tuple(MeetingPoints)
 
-    return Position_min,Position_max, end_program
+    return MeetingPoints,end_program,E_guess
+
+
+def DetermineMinAndMax(MeetingPoints):
+    """This function determines the minimal and maximal position where the wave function will be set to 0 depending on the points where the potential meets the guess energy and on
+    the minimum and maximum that are initially set for the potential.
+
+    Parameter:
+    ----------
+        MeetingPoints (tuple) : the minimum and maximum point where the potentil meets the guessed energy
+        E_guess (float) : The minimum value of the position for the potential
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+        PotentialArray (numpy.darray) : a Numpy array that contains the potential for certain points
+        PositionPotential (numpy.darray) : a Numpy array that contains the positions that correspond to the potential array
+
+    Returns:
+    --------
+        Position_min (float) : the minimum value where psi=0
+        Position_max (float) : the maximum value where psi=0
+
+    """
+
+    #Sets the min and max as the half of the distance between the min and the max plus the min or the max
+    Position_min = MeetingPoints[0] - (MeetingPoints[1] - MeetingPoints[0])/1
+    Position_max =  MeetingPoints[1] + (MeetingPoints[1] - MeetingPoints[0])/1
+
+    return Position_min,Position_max
+
 
 #######################################
 # iii) Calculate the wave function
 
 def WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, Position_min, Position_max):
-    '''This function calculates the wave function values depending on the x coordinate by using the Numerov method. The function returns a list that contains tuple with the x coordinate and
-    the wave function value. It has the general form: [(x0, psi(x0)), (x1, psi(x1)), ...]'''
+    """This function calculates the wave function values depending on the x coordinate by using the Numerov method. The function returns a list that contains tuple with the x coordinate and
+    the wave function value.
+
+    Parameter:
+    ----------
+        potential (str) : a string that defines the mathematical form of the potential
+        nbr_division (int) : defines the number of division in the wave function, wich is equivalent to the number of iteration to be made
+        Initial_augmentation (float) : Defines the initial augmentation after the minimal x point where the wave function is set to zero
+        Position_min : the minimum value where psi=0
+        Position_max : the maximum value where psi=0
+
+    Returns:
+    --------
+        WaveFunction (list) : Defines the wave function. Has the general form: [(x0, psi(x0)), (x1, psi(x1)), ...]
+
+    """
 
     #Initializing the wave function
     WaveFunction = []
@@ -474,13 +502,24 @@ def WaveFunctionNumerov(potential, E_guess, nbr_division, Initial_augmentation, 
     return WaveFunction
 
 
-
-
 ########################################################
 # iv) Determine the number of nodes in the wave function
 
 def NumberNodes(WaveFunction):
-    '''This function evaluates the number of nodes in the wavefunction. The number of nodes will allow us the determine the energy level to which a certain wave function corresponds'''
+    """This function evaluates the number of nodes in the wavefunction. The number of nodes will allow us the determine the energy level to which a certain wave function corresponds.
+
+    Parameter:
+    ----------
+        WaveFunction (list) : Defines the wave function. Has the general form: [(x0, psi(x0)), (x1, psi(x1)), ...]
+
+    Returns:
+    --------
+        NumerberOfNodes (int) : Defines the number of nodes in the wave function (the number of time this function passed by the x axis). The number of nodes in a wave funtion
+                                corresponds to the energy level of that wave function
+        PositionNodes (list) : Defines the x position of all the nodes. Has the form : [position_nodes_1, position_nodes_2, ...]
+        x_max (float) : the greatest position of a node. Corresponds to the maximum value of PositionNodes
+
+    """
 
     #Initialize the number of nodes and their position
     NumberOfNodes = 0
@@ -499,18 +538,31 @@ def NumberNodes(WaveFunction):
         x.append(position)
     x_max = max(x)
 
-    print('PositionNodes:', PositionNodes)
-    #print('Position max x :', x_max)
-
     return NumberOfNodes,PositionNodes,x_max
-
 
 
 #####################################################
 # v) Verify if wave function respects the restriction
 
 def VerifyTolerance(WaveFunction, Tolerance, E_guess, E_guess_try, NumberOfNodes):
-    '''See if the wave function for the given energy level respects the tolerance. Returns yes if it respects the tolerance and no if not.'''
+    """See if the wave function for the given energy level respects the tolerance. The tolerance is defined in the parameters of the Numerov.py script. The tolerance is respected
+    if the last value of the wave function is smaller than this tolerance or if two energy guess are very very close (ratio of 0.9999999999). The function return yes in this case
+    and no otherwise.
+
+    Parameter:
+    ----------
+        WaveFunction (list) : Defines the wave function. Has the general form: [(x0, psi(x0)), (x1, psi(x1)), ...]
+        Tolerance (float) : Defines the tolerance wich the wave function must respect
+        E_guess (float) : The minimum value of the position for the potential
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+        NumerberOfNodes (int) : Defines the number of nodes in the wave function (the number of time this function passed by the x axis). The number of nodes in a wave funtion
+                                corresponds to the energy level of that wave function
+
+    Returns:
+    --------
+        VerificationTolerance (str) : defines if the wave function respects the condition. Has the value 'yes' if it resects them and 'no' otherwise
+
+    """
 
     # i) Checks if the last value of the wave function respects the tolerance
     VerificationTolerance = 'yes' if np.absolute(WaveFunction[-1][1]) < Tolerance else 'no'
@@ -528,8 +580,25 @@ def VerifyTolerance(WaveFunction, Tolerance, E_guess, E_guess_try, NumberOfNodes
 
     return VerificationTolerance
 
-def CorrectNodeNumber(NumberOfNodes,PositionNodes,x_max,E_guess,E_guess_try):
-    ''' '''
+def CorrectNodeNumber(NumberOfNodes, PositionNodes, x_max, E_guess, E_guess_try):
+    """This function corrects the number of nodes. So it removes a node if it is too close to the maximum value where \psi(x) is set to zero or if the E_guess doesn't correspond the the
+    energy levels defined by the number of nodes.
+
+    Parameter:
+    ----------
+        NumerberOfNodes (int) : Defines the number of nodes in the wave function (the number of time this function passed by the x axis). The number of nodes in a wave funtion
+                                corresponds to the energy level of that wave function
+        PositionNodes (list) : Defines the x position of all the nodes. Has the form : [position_nodes_1, position_nodes_2, ...]
+        x_max (float) : the greatest position of a node. Corresponds to the maximum value of PositionNodes
+        E_guess (float) : The minimum value of the position for the potential
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+
+    Returns:
+    --------
+        NumberOfNodesCorrected(int) : the corrected number of nodes
+
+    """
+
     NumberOfNodesCorrected = NumberOfNodes
     #Correct the number of nodes if E_guess is between the lowest energy for this number of nodes and the maximum for the number of nodes - 1
     try:
@@ -542,11 +611,25 @@ def CorrectNodeNumber(NumberOfNodes,PositionNodes,x_max,E_guess,E_guess_try):
 
     return NumberOfNodesCorrected
 
+
 #######################################################
 # vi) Saves energy and the correponding number of nodes
 
 def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
-    '''This function saves the guessed energy and the number of nodes corresponding to it. It return a dictionnary that has the general form: {NumberofNodes:[E_min, E_max], NumberOfnodes:[E_min, E_max]}'''
+    """This function saves the guessed energy and the number of nodes corresponding to it.
+
+    Parameter:
+    ----------
+        NumerberOfNodes (int) : Defines the number of nodes in the wave function (the number of time this function passed by the x axis). The number of nodes in a wave funtion
+                                corresponds to the energy level of that wave function
+        E_guess (float) : The minimum value of the position for the potential
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+
+    Returns:
+    --------
+        E_guess_try (Dict) : a dictionnary that contains the previous energy guess. Has the form : {nbr_nodes1:[E_min,E_max], nbr_nodes2:[E_min,E_max],...}
+
+    """
 
     #Checks if the key Number of Nodes exists. If it doesn't, define the two values in the list corresponding to the key NumberOfNodes as E_guess.
     try:
@@ -567,16 +650,38 @@ def SaveEnergy(NumberOfNodes, E_guess, E_guess_try):
     return E_guess_try
 
 
-
 #####################################
 # 3) Ouput (Energy levels and figure)
 ####################################
 
+#############################
+# i) ouput the energy levels
+def OuputEnergy(EnergyLevelFound):
+    for i,Energy in EnergyLevelFound.items():
+        print('Energy level', i, ':', Energy)
+
 ############################
-# i) Draw the figure
+# ii) Draw the figure
 
 #Define the wave funcions to plot, the lines corresponding to these wave function and the energy lines
 def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
+    """This functions defines what to plot in the figure with the wave function and the corresponding energy levels.
+
+    Parameter:
+    ----------
+        E_guess_tr (Dict) : a dictionnary that contains the wave function that respecetd the tolerance. Has the form {nbr_nodes1:WaveFunction1, nbr_nodes2:WaveFunction2, ...}
+        EnergyLevelFound (Dict) : a dictionnary that contains the energy guess that respecetd the tolerance. Has the form {nbr_nodes1:E1, nbr_nodes2:E2, ...}
+
+    Returns:
+    --------
+        y_max (float) : defines the maximum limit in the y axis that will be set. Correspond to 1.1 times the greatest energy level found
+        min_x (float) : defines the minium x value of the x axis. Correspond to the smallest x coordinate of all the wave function.
+        max_x (float) : defines the maximum x value of the x axis. Correspond to the greatest x coordinate of all the wave function.
+        WavPlot (list) : contains tuples that contain the numpy arrays with the x and y coordinates of the wave functions
+        WavLines (list) : contains tuples that contain numpy arrays with the x and y array of a line that passes in the middle of the wave function
+        EnergyLines (list) : contains tuples that contain numpy arrays with the x and y array of a line that defines an energy level
+
+    """
 
     # i) Determine the maximum energy to set the maximum value for the y axis
     y_max = 1.1*EnergyLevelFound[max(EnergyLevelFound)]
@@ -587,8 +692,8 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
     for i in WaveFunctionFound.keys():
         x=[]
         y=[]
-        for j in range(800,len(WaveFunctionFound[i])-800):
-            if not (j > 7500 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.07)):
+        for j in range(400,len(WaveFunctionFound[i])-400):
+            if not (j > 3750 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.07)):
                 x.append(WaveFunctionFound[i][j][0])
                 y.append(WaveFunctionFound[i][j][1])
         x = np.array(x)
@@ -624,6 +729,25 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
 
 #Draw the wave Functions, the energy levels and sets the axis limits
 def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, PositionPotential, PotentialArray):
+    """This functions plots a figure with two subplots: the first contains the potential and a line for each energy level and the second contains the potential and
+    animation of the real and imaginary part of the wave function (note that the wave function aren't centered at their corresponding energy level but are equally spaced
+    for visibility)
+
+    Parameter:
+    ----------
+        y_max (float) : defines the maximum limit in the y axis that will be set. Correspond to 1.1 times the greatest energy level found
+        min_x (float) : defines the minium x value of the x axis. Correspond to the smallest x coordinate of all the wave function.
+        max_x (float) : defines the maximum x value of the x axis. Correspond to the greatest x coordinate of all the wave function.
+        WavPlot (list) : contains tuples that contain the numpy arrays with the x and y coordinates of the wave functions
+        WavLines (list) : contains tuples that contain numpy arrays with the x and y array of a line that passes in the middle of the wave function
+        EnergyLines (list) : contains tuples that contain numpy arrays with the x and y array of a line that defines an energy level
+        PotentialArray (numpy.darray) : a Numpy array that contains the potential for certain points
+        PositionPotential (numpy.darray) : a Numpy array that contains the positions that correspond to the potential array
+
+    Returns:
+    --------
+
+    """
 
     ###################################################################################################
     # i) Define a new figure with two subplot: the energy levels and the corresponding wave function
@@ -631,6 +755,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
     #Set figure title
     f.suptitle("Schrödinger equation solutions",fontsize=20,fontweight='bold')
+
 
     ################################
     # ii) Draw the wave functions
@@ -646,6 +771,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Draw the potential
     Wav.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=2)
 
+
     ################################
     # iii) Draw the Energy levels
     i = 1
@@ -660,8 +786,9 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Draw the potential
     En.plot(PositionPotential, PotentialArray, 'r',label='Potential',zorder=1)
 
+
     ####################################################
-    # iv) Sets differents esthetic components
+    # iv) Sets differents aesthetic components
 
     #For the wave function set the title and the axis title
     Wav.set_xlabel(r'x ($a_0$)')
@@ -688,6 +815,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     leg2 = En.legend(fancybox=True, loc='upper right')
     leg2.get_frame().set_alpha(1)
 
+
     #################################
     # v) Animate the wave function
 
@@ -708,20 +836,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=20, blit=False)
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False)
     plt.show()
 
-#Draw the potential
-def DrawPotential(PositionPotential, PotentialArray):
-    plt.plot(PositionPotential, PotentialArray, 'r')
-
-#Displays the figure
-def DisplayFigure():
-    plt.show()
-
-#############################
-# ii) ouput the energy levels
-def OuputEnergy(EnergyLevelFound):
-    for i,Energy in EnergyLevelFound.items():
-        print('Energy level', i, ':', Energy)
 
