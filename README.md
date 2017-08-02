@@ -10,6 +10,6 @@ Examples
 
 ![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/Harm_pot.mp4)
 
-![Tooth potential](https://github.com/FelixDesrochers/Numerov/tree/master/video/Tooth_pot.mp4)
+
 
 
