@@ -836,7 +836,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=200, )
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=100, )
 
     plt.show()
 
