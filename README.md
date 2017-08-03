@@ -10,6 +10,6 @@ Examples
 
 ![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/essai.gif)
 
-<img src="/video/essai.gif?raw=true" width="1000" height="1000" />
+<img src="/video/essai.gif?raw=true" width="1000" height="800" />
 
 
