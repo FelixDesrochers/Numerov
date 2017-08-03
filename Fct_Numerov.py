@@ -836,11 +836,11 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=300, )
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=100, )
 
 
-    mng = plt.get_current_fig_manager()
-    mng.full_screen_toggle()
+    fig = plt.gcf()
+    fig.set_size_inches(18.5, 10.5, forward=True)
 
     plt.show()
 
@@ -849,5 +849,5 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     #Writer = animation.writers['ffmpeg']
     #writer = Writer(fps=15, bitrate=1800)
 
-    anim.save('Schrod.gif', writer='imagemagick', fps=30)
+    anim.save('Schrod.gif', writer='imagemagick', dpi=100, fps=25)
 

@@ -8,9 +8,8 @@ Description
 Examples
 --------
 
-![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.gif)
+![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/essai.gif)
+
+<img src="/video/essai.gif?raw=true" width="100" height="100" />
 
 
-<p align="center">
-  <img src="https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.gif" width="350"/>
-</p>
