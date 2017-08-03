@@ -9,3 +9,8 @@ Examples
 --------
 
 ![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.gif)
+
+
+<p align="center">
+  <img src="https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.gif" width="350"/>
+</p>
