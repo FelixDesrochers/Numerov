@@ -15,7 +15,7 @@ $ Which first energy levels do you want (enter an integer) : 8
 $ Potential (as a fonction of x): x**2
 ```
 
-<img src="/Examples/Harm_pot.gif?raw=true" width="1100" height="700" />
+<img src="/Examples/Harm_pot.gif?raw=true" width="1200" height="600" />
 
 ```
 Energy level 0 : 0.707658207399
@@ -36,7 +36,7 @@ $ Which first energy levels do you want (enter an integer) : 7
 $ Potential (as a fonction of x): (x^4)+6*(x^2)-9
 ```
 
-<img src="/Examples/Double_pot.gif?raw=true" width="1100" height="700" />
+<img src="/Examples/Double_pot.gif?raw=true" width="1200" height="600" />
 
 ```
 Energy level 0 : 2.35727297545
