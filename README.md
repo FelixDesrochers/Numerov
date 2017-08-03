@@ -59,12 +59,7 @@ This program can also solve the Schrödinger equation for all sorts of unorthodo
 
 #### Double-Well Potential
 
-For a "double-well potential" with the following form,
-
-\begin{equation}
-x^{4}-6x^{2}+9
-\end{equation}
-
+For a "double-well potential" with the following input,
 
 ```sh
 $ python Numerov.py
@@ -79,7 +74,7 @@ we get the following results:
 ```
 Energy level 0 : 2.35727297545
 Energy level 1 : 2.35937176485
-#Energy level 2 : 6.54881394689
+Energy level 2 : 6.54881394689
 Energy level 3 : 6.68442950475
 Energy level 4 : 9.41561275062
 Energy level 5 : 10.6784965326
@@ -88,7 +83,7 @@ Energy level 6 : 12.8773418447
 
 ### Other Examples
 
-And for the absolute value (V(x)=|x|), we get:
+And for the absolute value potential (V(x)=|x|), we get:
 
 <img src="/Examples/abs_value.gif?raw=true" width="1200" height="600" />
 
