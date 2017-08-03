@@ -836,14 +836,18 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=100, )
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=300, )
+
+
+    mng = plt.get_current_fig_manager()
+    mng.full_screen_toggle()
 
     plt.show()
 
     #Saving the animation
     # Set up formatting for the movie files
-    Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=15, bitrate=1800)
+    #Writer = animation.writers['ffmpeg']
+    #writer = Writer(fps=15, bitrate=1800)
 
-    anim.save('Schrod.mp4', writer=writer)
+    anim.save('Schrod.gif', writer='imagemagick', fps=30)
 
