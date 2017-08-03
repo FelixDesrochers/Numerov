@@ -827,16 +827,16 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     def UpdateData(t):
         for j,line in enumerate(lines):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/30)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.cos(EnergyLines[j][1][0]*t/40)) + (WavLines[j][1][0])
             line.set_data(x,y)
         for j,line in enumerate(lines2):
             x = WavPlot[j][0]
-            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/30)) + (WavLines[j][1][0])
+            y = ((WavPlot[j][1] - (WavLines[j][1][0]))  * np.sin(EnergyLines[j][1][0]*t/40)) + (WavLines[j][1][0])
             line.set_data(x,y)
 
         return lines,lines2
 
-    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=100, )
+    anim = animation.FuncAnimation(f, UpdateData, init_func=init, interval=15, blit=False, repeat=True, save_count=300, )
 
 
     fig = plt.gcf()

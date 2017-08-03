@@ -15,7 +15,7 @@ $ Which first energy levels do you want (enter an integer) : 8
 $ Potential (as a fonction of x): x**2
 ```
 
-<img src="/Examples/Harm_pot.gif?raw=true" width="1200" height="600" />
+<img src="/Examples/Harm_pot2.gif?raw=true" width="1200" height="600" />
 
 ```
 Energy level 0 : 0.707658207399
