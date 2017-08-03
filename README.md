@@ -8,8 +8,4 @@ Description
 Examples
 --------
 
-![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.mp4)
-
-
-
-
+![Harmonic oscillator](https://github.com/FelixDesrochers/Numerov/tree/master/video/Schrod.gif)
