@@ -5,8 +5,28 @@ Description: This module defines all the necessary functions that are used in th
 
 author: Félix Desrochers
 email: felix.desrochers@polymtl.ca
-license: copyleft
-Feel free to modify and improve this code, but preserve any derivative of it open source and keep the information above. Thanks!
+
+MIT License
+
+Copyright (c) 2017 Félix Desrochers
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 
@@ -692,7 +712,7 @@ def DefineWhatToPlot(WaveFunctionFound, EnergyLevelFound):
     for i in WaveFunctionFound.keys():
         x=[]
         y=[]
-        for j in range(400,len(WaveFunctionFound[i])-400):
+        for j in range(400,len(WaveFunctionFound[i])-240):
             if not (j > 3750 and np.absolute(WaveFunctionFound[i][j][1]) > (max(y)*0.07)):
                 x.append(WaveFunctionFound[i][j][0])
                 y.append(WaveFunctionFound[i][j][1])
@@ -801,7 +821,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
         if label not in newLabels:
             newLabels.append(label)
             newHandles.append(handle)
-    leg1 = Wav.legend(newHandles, newLabels, fancybox=True, loc='upper right')
+    leg1 = Wav.legend(newHandles, newLabels, loc='upper left', fontsize='x-small')
     leg1.get_frame().set_alpha(1)
 
     #Identify each wave function
@@ -812,7 +832,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     En.set_xlabel(r'x ($a_0$)')
     En.set_ylabel('Energy (Hartree)')
     En.set_title('Energy levels',fontsize=14)
-    leg2 = En.legend(fancybox=True, loc='upper right')
+    leg2 = En.legend(loc='upper left', fontsize='x-small')
     leg2.get_frame().set_alpha(1)
 
 
@@ -845,9 +865,5 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     plt.show()
 
     #Saving the animation
-    # Set up formatting for the movie files
-    #Writer = animation.writers['ffmpeg']
-    #writer = Writer(fps=15, bitrate=1800)
-
     anim.save('Schrod.gif', writer='imagemagick', dpi=100, fps=25)
 

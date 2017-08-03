@@ -7,15 +7,21 @@ A python script that solves the one dimensional time-independent Schrodinger equ
 
 ## Examples
 
-### Harmonic oscillator
+### Harmonic Oscillator
+
+For instance, if we want the energy levels for the quantum harmonic oscillator we would run the following commands:
 
 ```sh
-$ pyhton Numerov.py
-$ Which first energy levels do you want (enter an integer) : 8
-$ Potential (as a fonction of x): x**2
+$ python Numerov.py
+$ >> Which first energy levels do you want (enter an integer) : 8
+$ >> Potential (as a fonction of x): x**2
 ```
 
+The programm then displays the following figure
+
 <img src="/Examples/Harm_pot.gif?raw=true" width="1200" height="600" />
+
+,and the following energies:
 
 ```
 Energy level 0 : 0.707658207399
@@ -28,12 +34,12 @@ Energy level 6 : 9.19238815459
 Energy level 7 : 10.6066017163
 ```
 
-### Other examples
+### Double-Well Potential
 
 ```sh
-$ pyhton Numerov.py
-$ Which first energy levels do you want (enter an integer) : 7
-$ Potential (as a fonction of x): (x^4)+6*(x^2)-9
+$ python Numerov.py
+$ >> Which first energy levels do you want (enter an integer) : 7
+$ >> Potential (as a fonction of x): (x^4)+6*(x^2)-9
 ```
 
 <img src="/Examples/Double_pot.gif?raw=true" width="1200" height="600" />
@@ -41,9 +47,18 @@ $ Potential (as a fonction of x): (x^4)+6*(x^2)-9
 ```
 Energy level 0 : 2.35727297545
 Energy level 1 : 2.35937176485
-Energy level 2 : 6.54881394689
+#Energy level 2 : 6.54881394689
 Energy level 3 : 6.68442950475
 Energy level 4 : 9.41561275062
 Energy level 5 : 10.6784965326
 Energy level 6 : 12.8773418447
 ```
+
+### Other Examples
+
+<img src="/Examples/abs_value.gif?raw=true" width="1200" height="600" />
+
+# License
+MIT - [http://alco.mit-license.org](http://alco.mit-license.org)
+
+(See the LICENSE.md for more informations)
