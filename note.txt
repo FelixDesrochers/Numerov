@@ -1,11 +1,11 @@
 # Notes personnelles concernant les modifications ou idées à apporter au programme
 
-1) Enlever points trop élevé à la fin de la fonction d'onde (Filtrer avant de display le graphique)
+1) Enlever points trop élevé à la fin de la fonction d'onde (Filtrer avant de display le graphique) [Check]
 
 2) Ajouter dans graphique :
     -Fixer bug (vide blanc en haut de graphique) [check]
-    -mettre indication E et \psi directement dur le grahique [check] (Voir pour être certain si met E ou pas)
-    -fonc blanc à légende
+    -mettre indication E et \psi directement dur le grahique [check] (Voir pour être certain si met E ou pas) [Check]
+    -fonc blanc à légende [Check]
     -bloc avec les énergies exactes
 
 3) Ajouter bloc try, except dans find Meeting points afin de prolonger potentiel si fonctionne pas
@@ -14,7 +14,7 @@
 
 5) Ajouter pour potentiel carré
 
-6) Fixer commentaires et docstring
+6) Fixer commentaires et docstring [Check]
 
 7) Optimiser le code
 

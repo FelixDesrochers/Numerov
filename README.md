@@ -81,7 +81,7 @@ Energy level 5 : 10.6784965326
 Energy level 6 : 12.8773418447
 ```
 
-### Other Examples
+### Absolute value potential 
 
 And for the absolute value potential (V(x)=|x|), we get:
 
