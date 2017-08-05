@@ -3,27 +3,22 @@
 % Created : august 3 2017
 %
 
-\documentclass[12pt,twocolumn]{article}
+\documentclass[12pt]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage{graphicx}
-\usepackage{apstopdf}
-%\usepackage{caption}
+\usepackage{caption}
 \usepackage{amsmath}
 \usepackage{vmargin}
 \usepackage{hyperref}
 \usepackage{array}
 
 
-%%%%%%%%%%%%%%%%%%
-% Configurations %
-%%%%%%%%%%%%%%%%%%
-
-\geometry{top=34mm,bottom=34mm}
-
-
+%%%%%%%%%%%%
+% Document %
+%%%%%%%%%%%%
 
 \begin{document}
 
@@ -35,8 +30,8 @@
 The Numerov method is a general numerical method to solve second order differential equation of the form
 
 \begin{equation}
-  \frac{d^2y}{dx^2} +g(x)y(x)+s(x) = 0
-  \label{NumerovDifEquation}
+\frac{d^2y}{dx^2}+g(x)y(x)+s(x) = 0
+\label{NumerovDifEquation}
 \end{equation}
 
 where g(x) and s(x) are continuous function on the domain [a,b]. To solve this eaution we will need to solve this problem as a boundary value problem: y(a) and y(b) are known. At this point,
@@ -45,32 +40,32 @@ illustrated in figure *****
 
 ****Put figure with interval
 
-Then the solution y(x) is also obtain as a discrete set of point for each $x_i$. This means that we now have $y(x)=y(x_i)=y_i$, and the equation is then 
+Then the solution y (x) is also obtain as a discrete set of point for each $x_i$. This means that we now have $y(x)=y(x_i)=y_i$, and the equation is then 
 
 \begin{equation}
-  \frac{d^2y_i}{dx^2} +g_i(x)y_i(x)+s_i(x) = 0
-  \label{NumerovEqDiscrete}
+\frac{d^2y_i}{dx^2} +g_i(x)y_i(x)+s_i(x) = 0
+\label{NumerovEqDiscrete}
 \end{equation}
 
 Then if we develop the taylor serie for $y_i$ around $x+h$ we have:
 
 \begin{equation}
-  y(x+h) = y(x) + hy'(x) + \frac{h^2}{2}y''(x) + \frac{h^3}{6}y^{(3)}(x) + \frac{h^4}{24}y^{4}(x) + \frac{h^5}y^{5}(x) + \cdots
-  \label{TaylorPlush}
+y(x+h) = y(x) + hy'(x) + \frac{h^2}{2}y''(x) + \frac{h^3}{6}y^{(3)}(x) + \frac{h^4}{24}y^{4}(x) + \frac{h^5}y^{5}(x) + \cdots
+\label{TaylorPlush}
 \end{equation}
 
-Similarly for the expansion around $x-h$ :
+Similarly for the expansion around $x-h$:
 
 \begin{equation}
-  y(x+h) = y(x) - hy'(x) + \frac{h^2}{2}y''(x) - \frac{h^3}{6}y^{(3)}(x) + \frac{h^4}{24}y^{4}(x) - \frac{h^5}y^{5}(x) + \cdots
-  \label{Taylor-h}
+y(x+h) = y(x) - hy'(x) + \frac{h^2}{2}y''(x) - \frac{h^3}{6}y^{(3)}(x) + \frac{h^4}{24}y^{4}(x) - \frac{h^5}y^{5}(x) + \cdots
+\label{Taylor-h}
 \end{equation}
 
-Then by adding equation \ref{TaylorPlush} and \ref{Taylor-h}, we obtain 
+Then by adding equation~\ref{TaylorPlush} and~\ref{Taylor-h}, we obtain, 
 
 \begin{equation}
-  y(x+h) + y(x-h) = 2y(x) + h^2y''(x) + \frac{h^4}{12}y^{4}(x) + O(h^6)
-  \label{AddingEq}
+y(x+h) + y(x-h) = 2y(x) + h^2y''(x) + \frac{h^4}{12}y^{4}(x) + O(h^6)
+\label{AddingEq}
 \end{equation}
 
 
@@ -81,7 +76,7 @@ In this script the Numerov method is used to solve the one-dimensionnal time-ind
 The one-dimensional time-independant Scrödinger equation is 
 \begin{equation}
 -\frac{\hbar^2}{2m}\frac{d^2\psi}{dx^2} + V(x)\psi(x) = E\psi(x)
-  \label{SchrodEq}
+\label{SchrodEq}
 \end{equation}
 
 where $\psi(x)$ is the wavefunction, V(x) the potential energy, $m$ the mass and $\hbar$ the reduced Planck constant. This formula would be hard to compute because of the very small values
@@ -89,14 +84,9 @@ of $\hbar$ and $m$ ($\hbar = 1.05457 \cdot 10^{-34}$ and $m_e = 9.11\cdot10^{-31
 following fundamentals physical constants are unity:  the reduced Planck constant $\hbar$, the elementary charge $e$, the electron mass $m_e$ and Coulomb's constant $k_e = \frac{1}{4\pi\epsilon_0}$.
 So in this unit system, Schrödinger's equation is simply:
 
-\begin{equation}
-  
-  \label{}
-\end{equation}<++>
 
 
-
-\section{Algorithm to solve the Schrodinger equation}
+\section{Algorithm to solve the Schrödinger equation}
 
 
 

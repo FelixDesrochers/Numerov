@@ -794,7 +794,7 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
 
     ################################
     # iii) Draw the Energy levels
-    i = 1
+    i = 0
     for x,y in EnergyLines:
         PlotColor = cm.viridis(i/len(EnergyLines))
         En.plot(x,y,'--',color=PlotColor,label='E'+str(i),zorder=2)

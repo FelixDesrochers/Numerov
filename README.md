@@ -64,7 +64,7 @@ For a "double-well potential" with the following input,
 ```sh
 $ python Numerov.py
 $ >> Which first energy levels do you want (enter an integer) : 7
-$ >> Potential (as a fonction of x): (x^4)+6*(x^2)-9
+$ >> Potential (as a fonction of x): (x^4)-6*(x^2)+9
 ```
 
 we get the following results:
@@ -95,6 +95,9 @@ Energy level 3 : 3.24460762395
 Energy level 4 : 3.82571482969
 Energy level 5 : 4.38167123906
 Energy level 6 : 4.89181971232
+Energy level 7 : 5.38661378006
+Energy level 8 : 5.8513002713
+Energy level 9 : 6.30526300457
 ```
 
 # Contributing
