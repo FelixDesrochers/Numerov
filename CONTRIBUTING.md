@@ -1,4 +1,4 @@
-I am oppen to any improvement suggestion or contribution. If you wish to contribute to this repository just follow these simple steps:
+I am open to any improvement suggestion or contribution. If you wish to contribute to this repository just follow these simple steps:
 
 1. Fork it (https://github.com/yourname/yourproject/fork)
 2. Create your feature branch (git checkout -b feature/fooBar)
