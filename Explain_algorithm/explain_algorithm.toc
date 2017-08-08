@@ -1,5 +1,0 @@
-\select@language {french}
-\contentsline {section}{\numberline {1}Numerov method}{2}{section.1}
-\contentsline {section}{\numberline {2}Application to the Sch\IeC {\"o}dinger equation}{3}{section.2}
-\contentsline {section}{\numberline {3}Algorithm to solve the Schrodinger equation}{3}{section.3}
-\contentsline {section}{\numberline {4}More details about the implemented algorithm}{3}{section.4}
