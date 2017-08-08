@@ -100,7 +100,7 @@ Energy level 8 : 5.8513002713
 Energy level 9 : 6.30526300457
 ```
 
-#Algorithm
+# Algorithm
 
 All information about he used algorithm are described in the explain_algorithm.pdf file.
 
