@@ -40,7 +40,7 @@ The program then displays the following figure:
 
 <img src="/Examples/Harm_pot.gif?raw=true" width="1200" height="600" />
 
-And the following energies:
+And the following energies (please note that these are obtained using atomic units, see https://en.wikipedia.org/wiki/Atomic_units for more details):
 
 ```
 Energy level 0 : 0.707658207399
@@ -81,7 +81,7 @@ Energy level 5 : 10.6784965326
 Energy level 6 : 12.8773418447
 ```
 
-### Absolute value potential 
+#### Absolute value potential 
 
 And for the absolute value potential (V(x)=|x|), we get:
 
