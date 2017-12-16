@@ -14,7 +14,7 @@ $ cd Numerov
 $ python Numerov.py
 ```
 
-Then the program will ask you to enter the number of energy levels you want to display and the desired potential (make sure that the potential is centered at x=0):
+Then the program will ask you to enter the number of energy levels you want to display and the desired potential (make sure that the potential is approximately centered at x=0):
 
 ```
 $ >> Which first energy levels do you want (enter an integer) : 4
