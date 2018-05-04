@@ -70,8 +70,7 @@ Tolerance = 0.00000001
 ###########################################################################
 
 # i) Energy levels
-E_level = input('Which first energy levels do you want (enter an integer) : ')
-E_level = int(E_level)
+E_level = int(input('Which first energy levels do you want (enter an integer) : '))
 E_lvl = list(range(0,E_level))
 
 # ii) Potential
@@ -79,7 +78,7 @@ potential=input('Potential (as a fonction of x): ')
 
 #Verify if the potential expression is correct (Syntax, bounadries value and "global concavity")
 i=1
-while i ==1:
+while i == 1:
     #Changes the expression to be sure it matches python mathematical syntax
     potential = Fct_Numerov.ModifyPotential(potential)
 
