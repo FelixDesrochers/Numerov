@@ -868,5 +868,6 @@ def DrawWaveFunction(y_max, min_x, max_x, WavPlot, WavLines, EnergyLines, Positi
     plt.show()
 
     #Saving the animation
-    anim.save('Schrod.gif', writer='imagemagick', dpi=100, fps=25)
+    #anim.save('Schrod.gif', writer='imagemagick', dpi=100, fps=25)
+    #anim.save('Schrod.gif', writer='ffmpeg', dpi=100, fps=25)
 
