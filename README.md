@@ -1,6 +1,6 @@
 # Numerov
 
-A python script that solves the one dimensional time-independent Schrodinger equation for bound states.  The script uses a Numerov method to solve the differential equation and displays the wanted energy levels and a figure with an approximate wave function for each of these energy levels.
+A python script that solves the one dimensional time-independent Schrodinger equation for bound states.  The script uses a Numerov method to solve the differential equation and displays the desired energy levels and a figure with an approximate wave function for each of these energy levels.
 
 
 
@@ -55,7 +55,7 @@ Energy level 7 : 10.6066017163
 
 ### Other Examples
 
-This program can also solve the Schrödinger equation for all sorts of unorthodox such as the double-well potential or the absolute value.
+This program can also solve the Schrödinger equation for all sorts of unorthodox problems such as the double-well potential or the absolute value potential.
 
 #### Double-Well Potential
 
@@ -102,7 +102,7 @@ Energy level 9 : 6.30526300457
 
 # Algorithm
 
-All informations about the used algorithm are described in the explain_algorithm.pdf file.
+All informations about the used algorithm are described in the explain_algorithm.pdf file (incomplete).
 
 
 # Contributing
